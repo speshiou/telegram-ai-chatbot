@@ -1,0 +1,8 @@
+python-telegram-bot==20.6
+openai==0.28.1
+tiktoken==0.5.1
+pymongo==4.3.3
+pydub
+youtube-transcript-api
+trafilatura
+replicate==0.15.5
