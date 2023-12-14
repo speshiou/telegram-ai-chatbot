@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+  telegram_ai_chatbot:
+    container_name: telegram-ai-chatbot
+    environment:
+      - MONGODB_PORT=${MONGODB_PORT:-27017}
+      - TELEGRAM_BOT_NAME=${TELEGRAM_BOT_NAME}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_CHAT_API_TYPE=${OPENAI_CHAT_API_TYPE}
+      - AZURE_OPENAI_API_BASE=${AZURE_OPENAI_API_BASE}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - COQUI_STUDIO_TOKEN=${COQUI_STUDIO_TOKEN}
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
+      - GETIMG_API_TOKEN=${GETIMG_API_TOKEN}
+      - SINKIN_ACCOUNT=${SINKIN_ACCOUNT}
+      - ALLOWED_TELEGRAM_USERNAMES=${ALLOWED_TELEGRAM_USERNAMES}
+      - DEFAULT_CHAT_TIMEOUT=${DEFAULT_CHAT_TIMEOUT}
+      - FREE_QUOTA=${FREE_QUOTA}
+      - DALLE_TOKENS=${DALLE_TOKENS}
+      - TOKEN_PRICE=${TOKEN_PRICE}
+      - GPT_PROMPTS=${GPT_PROMPTS}
+      - TTS_MODELS=${TTS_MODELS}
+      - API_ENDPOINT=${API_ENDPOINT}
+      - WEB_APP_URL=${WEB_APP_URL}
+      - BUGREPORT_BOT_TOKEN=${BUGREPORT_BOT_TOKEN}
+      - BUGREPORT_CHAT_ID=${BUGREPORT_CHAT_ID}
+    restart: always
+    build:
+      context: "."
+    depends_on:
+      - mongo
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - ${MONGODB_PORT:-27017}:27017
+    volumes:
+      - ${MONGODB_PATH:-./mongodb}:/data/db
+    # TODO: add auth
+
+  mongo_express:
+    container_name: mongo-express
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - ${MONGO_EXPRESS_PORT:-8081}:${MONGO_EXPRESS_PORT:-8081}
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=${MONGODB_PORT:-27017}
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=chatgpt_telegram_bot
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USERNAME:-username}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD:-password}
+    depends_on:
+      - mongo
