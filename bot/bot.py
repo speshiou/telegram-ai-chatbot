@@ -492,6 +492,9 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     if num_prompt_tokens > openai_utils.max_context_tokens(model):
         await update.effective_message.reply_text(_("⚠️ Sorry, the message is too long for {}. Please reduce the length of the input data.").format(model))
         return
+    elif is_url and openai_utils.max_output_tokens(model, num_context_tokens=num_prompt_tokens) < 1000:
+        await update.effective_message.reply_text(_("⚠️ Sorry, the content from the link is too long for {}. Please try another link.").format(model))
+        return
     estimated_cost = int(num_prompt_tokens * prompt_cost_factor)
     if not await check_balance(update, estimated_cost, user):
         return
