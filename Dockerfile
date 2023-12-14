@@ -1,5 +1,7 @@
 FROM python:3.10-slim
 
+ENV PYTHONUNBUFFERED=1
+
 RUN apt-get update
 # for voice decoding
 RUN apt-get install -y ffmpeg
