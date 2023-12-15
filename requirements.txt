@@ -6,3 +6,4 @@ pydub
 youtube-transcript-api
 trafilatura
 replicate==0.15.5
+google-cloud-aiplatform==1.38.1

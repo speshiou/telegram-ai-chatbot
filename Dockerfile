@@ -1,6 +1,7 @@
 FROM python:3.10-slim
 
 ENV PYTHONUNBUFFERED=1
+ENV GOOGLE_APPLICATION_CREDENTIALS=/.gcp_key.json
 
 RUN apt-get update
 # for voice decoding

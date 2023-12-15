@@ -29,6 +29,7 @@ import trafilatura
 import config
 import database
 import openai_utils
+import gemini_utils
 import chatgpt
 import tts_helper
 import gen_image_utils
@@ -41,6 +42,7 @@ import bugreport
 # setup
 db = database.Database()
 logger = logging.getLogger(__name__)
+gemini_utils.init(config.CGP_PROJECT_ID)
 
 def get_commands(lang=i18n.DEFAULT_LOCALE):
     _ = i18n.get_text_func(lang)
@@ -435,7 +437,13 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     system_prompt = chat_mode["prompt"]
     # load model
     model_id = db.get_current_model(chat_id)
-    model = openai_utils.MODEL_GPT_4 if model_id == "gpt4" else openai_utils.MODEL_GPT_35_TURBO 
+    if model_id == "gpt4":
+        model = openai_utils.MODEL_GPT_4
+    elif model_id == "gemini":
+        model = gemini_utils.MODEL_GEMINI_PRO
+    else:
+        model = openai_utils.MODEL_GPT_35_TURBO 
+
     # load chat history to context
     messages = db.get_chat_messages(chat_id) if not disable_history else []
 
@@ -477,8 +485,8 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     # handle too many tokens
     max_message_count = -1
 
-    if upscale:
-        model = chatgpt.resolve_model(model, openai_utils.num_tokens_from_string(system_prompt + " " + message, model))
+    # if upscale:
+    #     model = chatgpt.resolve_model(model, openai_utils.num_tokens_from_string(system_prompt + " " + message, model))
 
     prompt_cost_factor, completion_cost_factor = chatgpt.cost_factors(model)
     remaining_tokens = db.get_user_remaining_tokens(user_id)
@@ -488,11 +496,11 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         # enable token saving mode for low balance users and external modes
         max_affordable_tokens = min(max_affordable_tokens, 2000)
 
-    prompt, num_prompt_tokens, n_first_dialog_messages_removed = chatgpt.build_prompt(system_prompt, messages, message, model, max_affordable_tokens)
-    if num_prompt_tokens > openai_utils.max_context_tokens(model):
+    prompt, num_prompt_tokens, n_first_dialog_messages_removed, updated_history = chatgpt.build_prompt(system_prompt, messages, message, model, max_affordable_tokens)
+    if num_prompt_tokens > chatgpt.max_context_tokens(model):
         await update.effective_message.reply_text(_("⚠️ Sorry, the message is too long for {}. Please reduce the length of the input data.").format(model))
         return
-    elif is_url and openai_utils.max_output_tokens(model, num_context_tokens=num_prompt_tokens) < 1000:
+    elif is_url and chatgpt.max_output_tokens(model, num_context_tokens=num_prompt_tokens) < 1000:
         await update.effective_message.reply_text(_("⚠️ Sorry, the content from the link is too long for {}. Please try another link.").format(model))
         return
     estimated_cost = int(num_prompt_tokens * prompt_cost_factor)
@@ -537,6 +545,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
             max_tokens=max_affordable_tokens,
             stream=config.STREAM_ENABLED,
             api_type=api_type,
+            history=updated_history,
         )
 
         prev_answer = ""
@@ -1335,6 +1344,7 @@ def run_bot() -> None:
     application.add_handler(CommandHandler("earn", show_earn_handle, filters=user_filter))
     application.add_handler(CommandHandler("gpt", common_command_handle, filters=user_filter))
     application.add_handler(CommandHandler("gpt4", common_command_handle, filters=user_filter))
+    application.add_handler(CommandHandler("gemini", common_command_handle, filters=user_filter))
     application.add_handler(CommandHandler("chatgpt", common_command_handle, filters=user_filter))
     application.add_handler(CommandHandler("proofreader", common_command_handle, filters=user_filter))
     application.add_handler(CommandHandler("dictionary", common_command_handle, filters=user_filter))

@@ -10,6 +10,9 @@ DEFAULT_MODELS = {
     },
     "gpt4": {
         "name": "GPT-4",
+    },
+    "gemini": {
+        "name": "Gemini",
     }
 }
 
@@ -140,6 +143,7 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 MESSAGE_MAX_LENGTH = 4000
 # OpenAI official API
 DEFAULT_OPENAI_API_TYPE = "open_ai"
+CGP_PROJECT_ID = os.getenv('CGP_PROJECT_ID')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 OPENAI_CHAT_API_TYPE = os.getenv('OPENAI_CHAT_API_TYPE', DEFAULT_OPENAI_API_TYPE)
 if not OPENAI_CHAT_API_TYPE:
