@@ -11,7 +11,7 @@ def _model_name(model, api_type):
     return model
 
 def resolve_model(model, num_prompt_tokens:int):
-    if (model == gemini_utils.MODEL_GEMINI_PRO):
+    if (model == gemini_utils.MODEL_GEMINI_VISION):
         return model
     original_model = model
     max_tokens = openai_utils.max_context_tokens(model)
@@ -21,12 +21,12 @@ def resolve_model(model, num_prompt_tokens:int):
     return model
 
 def max_output_tokens(model: str, num_context_tokens: int = None):
-    if (model == gemini_utils.MODEL_GEMINI_PRO):
+    if (model == gemini_utils.MODEL_GEMINI_VISION):
         return 2048
     return openai_utils.max_output_tokens(model, num_context_tokens)
 
 def max_context_tokens(model):
-    if (model == gemini_utils.MODEL_GEMINI_PRO):
+    if (model == gemini_utils.MODEL_GEMINI_VISION):
         return 4096
     return openai_utils.max_context_tokens(model)
     
@@ -43,7 +43,7 @@ def build_prompt(system_prompt, dialog_messages, new_message, model, max_tokens:
             # forget first message in dialog_messages
             dialog_messages = dialog_messages[1:]
             n_first_dialog_messages_removed = n_dialog_messages_before - len(dialog_messages)
-        if (model == gemini_utils.MODEL_GEMINI_PRO):
+        if (model == gemini_utils.MODEL_GEMINI_VISION):
             prompt = openai_utils.prompt_from_chat_messages(system_prompt, dialog_messages, new_message, openai_utils.MODEL_GPT_4)
             num_prompt_tokens = openai_utils.num_tokens_from_messages(prompt, openai_utils.MODEL_GPT_4)
         else:
@@ -53,12 +53,12 @@ def build_prompt(system_prompt, dialog_messages, new_message, model, max_tokens:
         if len(dialog_messages) < 1:
             break
 
-    if (model == gemini_utils.MODEL_GEMINI_PRO):
+    if (model == gemini_utils.MODEL_GEMINI_VISION):
         return new_message, num_prompt_tokens, n_first_dialog_messages_removed, dialog_messages
     return prompt, num_prompt_tokens, n_first_dialog_messages_removed, dialog_messages
 
 def cost_factors(model):
-    if (model == gemini_utils.MODEL_GEMINI_PRO):
+    if (model == gemini_utils.MODEL_GEMINI_VISION):
         return 5, 5
     if model == openai_utils.MODEL_GPT_4:
         return 10, 15
@@ -66,9 +66,9 @@ def cost_factors(model):
     #     return 20, 20
     return 0.5, 1
 
-async def send_message(prompt, model=openai_utils.MODEL_GPT_35_TURBO, max_tokens=None, stream=False, api_type=None, history=None):
-    if (model == gemini_utils.MODEL_GEMINI_PRO):
-        answer = gemini_utils.send_message(model, prompt, history)
+async def send_message(prompt, model=openai_utils.MODEL_GPT_35_TURBO, max_tokens=None, stream=False, api_type=None, history=None, image=None):
+    if (model == gemini_utils.MODEL_GEMINI_VISION):
+        answer = gemini_utils.send_message(model, prompt, history, image=image)
         num_completion_tokens = openai_utils.num_tokens_from_string(answer, model=openai_utils.MODEL_GPT_4)
         yield True, answer, num_completion_tokens
         return

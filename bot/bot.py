@@ -5,6 +5,7 @@ import html
 import json
 import re
 import math
+import pathlib
 from datetime import datetime
 
 import telegram
@@ -440,7 +441,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     if model_id == "gpt4":
         model = openai_utils.MODEL_GPT_4
     elif model_id == "gemini":
-        model = gemini_utils.MODEL_GEMINI_PRO
+        model = gemini_utils.MODEL_GEMINI_VISION
     else:
         model = openai_utils.MODEL_GPT_35_TURBO 
 
@@ -539,6 +540,16 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         # if api_type != config.DEFAULT_OPENAI_API_TYPE and "api_type" in config.CHAT_MODES[chat_mode]:
         #     api_type = config.CHAT_MODES[chat_mode]["api_type"]
 
+        photo_filename = None
+        # when replying to a photo
+        if update.effective_message.reply_to_message and update.effective_message.reply_to_message.photo:
+            photo = helper.get_original_photo(update.effective_message.reply_to_message.photo)
+            photo_file = await context.bot.get_file(photo.file_id)
+            path = pathlib.Path(f'tmp/images/{photo_file.file_unique_id}')
+            if not path.exists():
+                path = await photo_file.download_to_drive(f'tmp/images/{photo_file.file_unique_id}')
+            photo_filename = path.resolve()
+
         stream = chatgpt.send_message(
             prompt,
             model=model,
@@ -546,6 +557,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
             stream=config.STREAM_ENABLED,
             api_type=api_type,
             history=updated_history,
+            image=photo_filename,
         )
 
         prev_answer = ""

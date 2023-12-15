@@ -12,6 +12,7 @@ WORKDIR /src
 
 # A temporary directory for processing voice files
 RUN mkdir -p /src/tmp/voice
+RUN mkdir -p /src/tmp/images
 RUN pip install -r requirements.txt
 
 CMD ["python", "bot/bot.py"]
