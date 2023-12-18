@@ -115,6 +115,7 @@ def load_tts_models(tsv):
     return models
 
 MONGODB_PORT = os.getenv('MONGODB_PORT', 27017)
+MONGODB_NAME = os.getenv('MONGODB_NAME')
 MONGODB_URI = f"mongodb://mongo:{MONGODB_PORT}"
 
 FREE_QUOTA = _env_parse_int('FREE_QUOTA', 10000)
