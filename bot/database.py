@@ -10,7 +10,7 @@ import config
 class Database:
     def __init__(self):
         self.client = pymongo.MongoClient(config.MONGODB_URI)
-        self.db = self.client[config.MONGODB_NAME]
+        self.db = self.client[config.MONGODB_DATABASE]
 
         self.user_collection = self.db["users"]
         self.chat_collection = self.db["chats"]

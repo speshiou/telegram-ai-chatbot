@@ -4,8 +4,9 @@ services:
   telegram_ai_chatbot:
     container_name: telegram-ai-chatbot
     environment:
+      - MONGODB_HOST=${MONGODB_HOST:-mongo}
       - MONGODB_PORT=${MONGODB_PORT:-27017}
-      - MONGODB_NAME=${MONGODB_NAME:-telegram-ai-chatbot}
+      - MONGODB_DATABASE=${MONGODB_DATABASE:-telegram-ai-chatbot}
       - TELEGRAM_BOT_NAME=${TELEGRAM_BOT_NAME}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -34,31 +35,3 @@ services:
       context: "."
     volumes: 
       - ${GCP_KEY:-.gcp_key.json}:/.gcp_key.json
-    depends_on:
-      - mongo
-
-  mongo:
-    container_name: mongo
-    image: mongo:latest
-    restart: always
-    ports:
-      - ${MONGODB_PORT:-27017}:27017
-    volumes:
-      - ${MONGODB_PATH:-./mongodb}:/data/db
-    # TODO: add auth
-
-  mongo_express:
-    container_name: mongo-express
-    image: mongo-express:latest
-    restart: always
-    ports:
-      - ${MONGO_EXPRESS_PORT:-8081}:${MONGO_EXPRESS_PORT:-8081}
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongo
-      - ME_CONFIG_MONGODB_PORT=${MONGODB_PORT:-27017}
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
-      - ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGODB_NAME:-telegram-ai-chatbot}
-      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USERNAME:-username}
-      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD:-password}
-    depends_on:
-      - mongo

@@ -114,9 +114,10 @@ def load_tts_models(tsv):
             models[key] = model
     return models
 
-MONGODB_PORT = os.getenv('MONGODB_PORT', 27017)
-MONGODB_NAME = os.getenv('MONGODB_NAME')
-MONGODB_URI = f"mongodb://mongo:{MONGODB_PORT}"
+MONGODB_HOST = os.getenv('MONGODB_HOST')
+MONGODB_PORT = os.getenv('MONGODB_PORT')
+MONGODB_DATABASE = os.getenv('MONGODB_DATABASE')
+MONGODB_URI = f"mongodb://{MONGODB_HOST}:{MONGODB_PORT}"
 
 FREE_QUOTA = _env_parse_int('FREE_QUOTA', 10000)
 # default price for gpt-3.5-turbo
