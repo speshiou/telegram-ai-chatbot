@@ -490,6 +490,8 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     #     model = chatgpt.resolve_model(model, openai_utils.num_tokens_from_string(system_prompt + " " + message, model))
 
     prompt_cost_factor, completion_cost_factor = chatgpt.cost_factors(model)
+    image_cost_factor = 1000
+    num_processed_image = 0
     remaining_tokens = db.get_user_remaining_tokens(user_id)
     max_affordable_tokens = int(remaining_tokens / prompt_cost_factor)
     # determine if enabling saving mode
@@ -549,6 +551,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
             if not path.exists():
                 path = await photo_file.download_to_drive(f'tmp/images/{photo_file.file_unique_id}')
             photo_filename = path.resolve()
+            num_processed_image += 1
 
         stream = chatgpt.send_message(
             prompt,
@@ -644,7 +647,11 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
             )
         else:
             db.update_chat_last_interaction(chat_id)
-        final_cost = int(num_prompt_tokens * prompt_cost_factor + num_completion_tokens * completion_cost_factor)
+        final_cost = int(
+            num_prompt_tokens * prompt_cost_factor + 
+            num_completion_tokens * completion_cost_factor +
+            num_processed_image * image_cost_factor
+        )
         # IMPORTANT: consume tokens in the end of function call to protect users' credits
         db.inc_user_used_tokens(user_id, final_cost)
 
