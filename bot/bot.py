@@ -1231,7 +1231,7 @@ async def settings_handle(update: Update, context: CallbackContext, data: str = 
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
     chat_mode = db.get_current_chat_mode(chat_id)
-    db.upsert_chat(chat_id, chat_mode, clear_messages=False)
+    db.upsert_chat(chat_id, chat_mode, clear_history=False)
     _ = get_text_func(user, chat_id)
 
     query = update.callback_query
