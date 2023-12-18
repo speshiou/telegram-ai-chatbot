@@ -144,24 +144,6 @@ async def start_handle(update: Update, context: CallbackContext):
             )
         await set_chat_mode(update, context, reason="start")
 
-async def retry_handle(update: Update, context: CallbackContext):
-    user = await register_user_if_not_exists(update, context)
-    chat_id = update.effective_chat.id
-    _ = get_text_func(user, chat_id)
-    
-    user_id = update.message.from_user.id
-    db.set_user_attribute(user_id, "last_interaction", datetime.now())
-
-    messages = db.get_chat_messages(chat_id)
-    if not messages or len(messages) == 0:
-        await update.message.reply_text(_("😅 No conversation history to retry"))
-        return
-
-    last_dialog_message = messages.pop()
-    db.pop_chat_messages(chat_id)  # last message was removed from the context
-
-    await message_handle(update, context, message=last_dialog_message["user"], use_new_dialog_timeout=False)
-
 def parse_command(message):
     if not message.strip():
         return None
@@ -434,7 +416,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     # load role
     if "prompt" not in chat_mode:
         # custom role list won't contain prompts by default
-        chat_mode["prompt"] = db.get_role_prompt(chat_id, chat_mode["_id"])
+        chat_mode["prompt"] = db.get_role_prompt(user_id, chat_mode["_id"])
     system_prompt = chat_mode["prompt"]
     # load model
     model_id = db.get_current_model(chat_id)
@@ -446,7 +428,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         model = openai_utils.MODEL_GPT_35_TURBO 
 
     # load chat history to context
-    messages = db.get_chat_messages(chat_id) if not disable_history else []
+    messages = db.get_chat_history(chat_id) if not disable_history else []
 
     context_content = None
     if message is None:
@@ -640,7 +622,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         if not disable_history:
             # update user data
             new_dialog_message = {"user": message, "bot": sent_answer, "date": datetime.now(), "num_context_tokens": num_prompt_tokens, "num_completion_tokens": num_completion_tokens}
-            db.push_chat_messages(
+            db.push_chat_history(
                 chat_id,
                 new_dialog_message,
                 max_message_count,

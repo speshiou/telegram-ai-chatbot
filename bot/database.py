@@ -57,9 +57,14 @@ class Database:
 
         self.user_collection.update_one(query, update, upsert=True)
 
-    def upsert_chat(self, chat_id: int, chat_mode=config.DEFAULT_CHAT_MODE, clear_messages=True):
+    def _get_chat_filter(self, chat_id: int):
+        return {
+            "_id": f"{config.TELEGRAM_BOT_NAME}_{chat_id}",
+        }
+
+    def upsert_chat(self, chat_id: int, chat_mode=config.DEFAULT_CHAT_MODE, clear_history=True):
         default_data = {
-            "first_seen": datetime.now(),
+            "first_interaction": datetime.now(),
             "used_tokens": 0,
         }
 
@@ -68,26 +73,29 @@ class Database:
             "last_interaction": datetime.now(),
         }
 
-        if clear_messages:
-            data["messages"] = []
+        if clear_history:
+            data["history"] = []
             data["context"] = None
             data["context_src"] = None
         else:
-            default_data["messages"] = []
+            # set the initial history value here to prevent conflicts in the field
+            default_data["history"] = []
 
-        query = {"_id": chat_id}
+        filter = self._get_chat_filter(chat_id)
+
         update = {
             "$set": data,
             "$setOnInsert": default_data,
         }
 
-        self.chat_collection.update_one(query, update, upsert=True)
+        self.chat_collection.update_one(filter, update, upsert=True)
 
     def get_chat_attribute(self, chat_id: int, key: str):
         return self.get_chat_attributes(chat_id, [key])[0]
     
     def get_chat_attributes(self, chat_id: int, keys: list):
-        doc = self.chat_collection.find_one({"_id": chat_id})
+        filter = self._get_chat_filter(chat_id)
+        doc = self.chat_collection.find_one(filter)
 
         ret = []
         for key in keys:
@@ -101,23 +109,25 @@ class Database:
         return rate_limit_start, rate_count
     
     def inc_chat_rate_count(self, chat_id: int):
-        self.chat_collection.update_one({"_id": chat_id}, {"$inc": { 'rate_count': 1}})
+        filter = self._get_chat_filter(chat_id)
+        self.chat_collection.update_one(filter, {"$inc": { 'rate_count': 1}})
 
     def set_chat_attribute(self, chat_id: int, field: str, value):
         self.set_chat_attributes(chat_id, {field: value})
 
     def set_chat_attributes(self, chat_id: int, fields: dict):
-        self.chat_collection.update_one({"_id": chat_id}, {
+        filter = self._get_chat_filter(chat_id)
+        self.chat_collection.update_one(filter, {
             "$set": fields
         })
     
     def reset_chat_rate_limit(self, chat_id: int):
-        self.chat_collection.update_one({"_id": chat_id}, {
-            "$set": { 
-                'rate_limit_start': datetime.now(),
-                'rate_count': 1,
-            }
-        })
+        data = { 
+            'rate_limit_start': datetime.now(),
+            'rate_count': 1,
+        }
+
+        self.set_chat_attributes(chat_id, data)
 
     def get_current_chat_mode(self, chat_id: int):
         return self.get_chat_attribute(chat_id, 'current_chat_mode') or config.DEFAULT_CHAT_MODE
@@ -129,7 +139,7 @@ class Database:
         self.set_chat_attributes(chat_id, {
             'context': context,
             'context_src': context_src,
-            'messages': [],
+            'history': [],
         })
 
     def get_chat_context(self, chat_id: int):
@@ -155,32 +165,14 @@ class Database:
     def get_last_chat_time(self, chat_id: int):
         return self.get_chat_attribute(chat_id, 'last_interaction')
     
-    def get_chat_messages(self, chat_id: int):
-        return self.get_chat_attribute(chat_id, 'messages')
-
-    def pop_chat_messages(self, chat_id: int):
-        filter = {"_id": chat_id}
-        
-        self.chat_collection.update_one(
-            filter,
-            {"$pop": {"messages": 1}}
-        )
+    def get_chat_history(self, chat_id: int):
+        return self.get_chat_attribute(chat_id, 'history')
 
     def update_chat_last_interaction(self, chat_id: int):
-        filter = {"_id": chat_id}
-        data = {
-            "last_interaction": datetime.now()
-        }
+        self.set_chat_attribute(chat_id, "last_interaction", datetime.now())
 
-        self.chat_collection.update_one(
-            filter,
-            {
-                "$set": data,
-            }
-        )
-
-    def push_chat_messages(self, chat_id: int, new_dialog_message, max_message_count: int=-1):
-        filter = {"_id": chat_id}
+    def push_chat_history(self, chat_id: int, new_dialog_message, max_message_count: int=-1):
+        filter = self._get_chat_filter(chat_id)
         data = {
             "last_interaction": datetime.now()
         }
@@ -189,10 +181,12 @@ class Database:
                 filter,
                 {
                     "$set": data,
-                    "$push": {"messages": {
-                        "$each": [ new_dialog_message ],
-                        "$slice": -max_message_count,
-                    }}
+                    "$push": {
+                        "history": {
+                            "$each": [ new_dialog_message ],
+                            "$slice": -max_message_count,
+                        }
+                    }
                 }
             )
         else:
@@ -200,7 +194,9 @@ class Database:
                 filter,
                 {
                     "$set": data,
-                    "$push": {"messages": new_dialog_message}
+                    "$push": {
+                        "history": new_dialog_message
+                    }
                 }
             )
 
@@ -283,10 +279,10 @@ class Database:
             self.role_collection.find(filter, projection)
         )
 
-    def get_role_prompt(self, chat_id, _id):
+    def get_role_prompt(self, user_id: int, _id):
         filter = {
             '_id': _id,
-            'user_id': chat_id,
+            'user_id': user_id,
         }
 
         projection = {

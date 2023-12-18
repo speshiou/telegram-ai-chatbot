@@ -20,6 +20,7 @@ def hash_query(params):
 def common_params(user_id):
     params = {
         'user': json.dumps({'id': user_id}),
+        'bot_name': config.TELEGRAM_BOT_NAME,
     }
 
     return params
