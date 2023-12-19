@@ -2,7 +2,6 @@ version: "3"
 
 services:
   telegram_ai_chatbot:
-    container_name: telegram-ai-chatbot
     environment:
       - MONGODB_HOST=${MONGODB_HOST:-mongo}
       - MONGODB_PORT=${MONGODB_PORT:-27017}
