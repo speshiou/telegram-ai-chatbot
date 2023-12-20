@@ -58,8 +58,8 @@ def build_prompt(system_prompt, dialog_messages, new_message, model, max_tokens:
     return prompt, num_prompt_tokens, n_first_dialog_messages_removed, dialog_messages
 
 def cost_factors(model):
-    if (model == gemini_utils.MODEL_GEMINI_VISION):
-        return 5, 5
+    if model == gemini_utils.MODEL_GEMINI_VISION:
+        return 3, 3
     if model == openai_utils.MODEL_GPT_4:
         return 10, 15
     # elif model == openai_utils.MODEL_GPT_4_32K:
