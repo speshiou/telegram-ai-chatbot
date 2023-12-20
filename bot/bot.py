@@ -47,18 +47,23 @@ gemini_utils.init(config.CGP_PROJECT_ID)
 
 def get_commands(lang=i18n.DEFAULT_LOCALE):
     _ = i18n.get_text_func(lang)
+    base_commands = [
+        BotCommand("image", _("generate images")),
+        BotCommand("reset", _("start a new conversation")),
+        BotCommand("balance", _("check balance")),
+        # BotCommand("earn", _("earn rewards by referral")),
+    ]
+
+    if not config.ENABLE_SELECT_MODEL:
+        return base_commands
+
     return [
         BotCommand("gpt", _("use GPT-3.5 model")),
         BotCommand("gpt4", _("use GPT-4 model")),
         BotCommand("chatgpt", _("switch to ChatGPT mode")),
         BotCommand("proofreader", _("switch to Proofreader mode")),
         BotCommand("dictionary", _("switch to Dictionary mode")),
-        BotCommand("image", _("generate images")),
-        BotCommand("reset", _("start a new conversation")),
-        BotCommand("balance", _("check balance")),
-        BotCommand("settings", _("settings")),
-        # BotCommand("earn", _("earn rewards by referral")),
-    ]
+    ] + base_commands + [BotCommand("settings", _("settings")),]
 
 async def register_user_if_not_exists(update: Update, context: CallbackContext, referred_by: int = None):
     user = None
@@ -131,7 +136,8 @@ async def start_handle(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     _ = get_text_func(user, chat_id)
 
-    await settings_handle(update, context, data="about")
+    if config.ENABLE_SELECT_MODEL:
+        await settings_handle(update, context, data="about")
 
     if is_new_user and update.message:
         reply_markup = InlineKeyboardMarkup([
@@ -142,7 +148,7 @@ async def start_handle(update: Update, context: CallbackContext):
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup,
             )
-        await set_chat_mode(update, context, reason="start")
+    await set_chat_mode(update, context, reason="start")
 
 def parse_command(message):
     if not message.strip():
@@ -226,6 +232,7 @@ async def common_command_handle(update: Update, context: CallbackContext):
     cached_msg_id = None
 
     if update.callback_query:
+        # handle the retry button
         query = update.callback_query
         await query.answer()
         action, cached_msg_id = query.data.split("|")
@@ -241,7 +248,11 @@ async def common_command_handle(update: Update, context: CallbackContext):
     message = strip_command(message)
 
     if command in config.DEFAULT_MODELS:
-        await set_chat_model(update, context, command)
+        if config.ENABLE_SELECT_MODEL:
+            await set_chat_model(update, context, command)
+        return
+    
+    if not config.ENABLE_CUSTOM_ROLE:
         return
 
     chat_mode = command if command in config.CHAT_MODES else None
@@ -1060,6 +1071,13 @@ async def set_chat_mode(update: Update, context: CallbackContext, chat_mode_id =
                 _("Please \"SLOW DOWN\" interactions with the chatbot as group chats can easily exceed the Telegram rate limit. "),
                 _("Once this chat exceeds the rate limit, the chatbot won't respond temporarily."),
             ], _)
+
+    if not config.ENABLE_SELECT_MODEL:
+        if reason == "start":
+            text = _("Hello! How can I assist you today?")
+        elif reason != "reset":
+            return
+        keyborad_rows = None
 
     if keyborad_rows:
         reply_markup = InlineKeyboardMarkup(keyborad_rows)
