@@ -430,28 +430,22 @@ def settings(db: Database, chat_id: int, _, data: str = None):
 def about(_):
     text = _("Hi! My name is Nexia, an AI chatbot powered by OpenAI's GPT, DALL·E and Stable Diffusion models.")
     text += "\n\n"
-    text += _("<b>What can I do for you?</b>\n")
-    text += _("✉️ Writing\n")
-    text += _("🌎 Translate\n")
-    text += _("🤔 Provide ideas and solve problems\n")
-    text += _("💻 Programming and debugging\n")
-    text += "\n"
-    text += _("<b>More than ChatGPT</b>\n")
-    text += _("🧙‍♀️ Create custom versions of ChatGPT\n")
+    text += _("<b>Additional features</b>\n")
+    text += _("🧙‍♀️ Customizable chatbot\n")
     text += _("🎙 Support voice messages\n")
-    text += _("✍️ Proofreading (/proofreader)\n")
-    text += _("📔 Dictionary (/dictionary)\n")
-    text += _("🌐 Summarize the content of websites") + "\n"
-    text += _("🎬 Summarize Youtube videos (up to 20 minutes long)") + "\n"
-    text += _("👨‍🎨 Generate images (/image)\n")
-    text += _("👥 Group chat - add @{} to a group chat, then use /chatgpt to start.\n").format(config.TELEGRAM_BOT_NAME)
+    text += _("🌐 Summarize the content in links") + "\n"
+    text += _("🎬 Summarize Youtube videos (up to 20 minutes long)") + "\n" 
+    text += _("👥 Group chat - add this bot to a group chat, then type /chatgpt to start.\n").format(config.TELEGRAM_BOT_NAME)
+    text += "✍️ /proofreader - " + _("rewrite sentences\n")
+    text += "📔 /dictionary - " + _("learn about words/phrases\n")
+    text += "👨‍🎨 /image - " + _("generate images from text\n")
     text += "\n\n"
     text += _("""By using this chatbot, you agree to our <a href="{}">terms of service</a> and <a href="{}">privacy policy</a>.""").format("https://tgchat.co/terms-of-service", "https://tgchat.co/privacy-policy")
 
     reply_markup = InlineKeyboardMarkup([
         [
             InlineKeyboardButton("⚙️ " + _("Settings"), web_app=WebAppInfo(url=config.WEB_APP_URL)),
-            InlineKeyboardButton("💡 " + _("Learn"), url="https://t.me/ChatGPT_Prompts_Lab"),
+            InlineKeyboardButton("💡 " + _("Learn"), url="https://t.me/nexia_news"),
         ],
         [
             InlineKeyboardButton("❓ " + _("FAQ"), url="https://tgchat.co/faq"),

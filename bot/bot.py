@@ -63,7 +63,7 @@ def get_commands(lang=i18n.DEFAULT_LOCALE):
         BotCommand("chatgpt", _("switch to ChatGPT mode")),
         BotCommand("proofreader", _("switch to Proofreader mode")),
         BotCommand("dictionary", _("switch to Dictionary mode")),
-    ] + base_commands + [BotCommand("settings", _("settings")),]
+    ] + base_commands
 
 async def register_user_if_not_exists(update: Update, context: CallbackContext, referred_by: int = None):
     user = None
@@ -177,7 +177,7 @@ async def send_openai_error(update: Update, context: CallbackContext, e: Excepti
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
     _ = get_text_func(user, chat_id)
-    text = _("Temporary OpenAI server failure, please try again later.")
+    text = _("Temporary server failure, please try again later.")
     error_msg = f"{e}"
     if "RateLimitError" in error_msg:
         # openai.error.RateLimitError may contain sensitive data
@@ -771,7 +771,7 @@ async def image_message_handle(update: Update, context: CallbackContext):
 
             reply_markup = InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("💡 " + _("Learn"), url="https://t.me/sd_prompts_lab"),
+                    InlineKeyboardButton("💡 " + _("Learn"), url="https://t.me/nexia_news"),
                 ],
             ])
             await update.effective_message.reply_text(text, ParseMode.HTML, reply_markup=reply_markup)
@@ -1388,8 +1388,6 @@ def run_bot() -> None:
 
 
 if __name__ == "__main__":
-    if not config.TELEGRAM_BOT_TOKEN:
-        raise Exception("TELEGRAM_BOT_TOKEN not set")
     if not config.OPENAI_API_KEY:
         raise Exception("OPENAI_API_KEY not set")
     run_bot()

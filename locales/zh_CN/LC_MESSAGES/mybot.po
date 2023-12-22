@@ -1,658 +1,665 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Translations template for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2023-11-03 17:37+0800\n"
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-12-22 13:07+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.5\n"
+"Generated-By: Babel 2.14.0\n"
 
-
-#: ./bot/bot.py:48
-msgid "use GPT-3.5 model"
-msgstr "使用 GPT-3.5模型"
-
-#: ./bot/bot.py:49
-msgid "use GPT-4 model"
-msgstr "使用 GPT-4模型"
-
-#: ./bot/bot.py:50
-msgid "switch to ChatGPT mode"
-msgstr "切换到 ChatGPT 模式"
-
-#: ./bot/bot.py:51
-msgid "switch to Proofreader mode"
-msgstr "切换到校对模式"
-
-#: ./bot/bot.py:52
-msgid "switch to Dictionary mode"
-msgstr "切换到字典模式"
-
-#: ./bot/bot.py:53
+#: ../telegram-ai-chatbot/bot/bot.py:51
 msgid "generate images"
 msgstr "生成图像"
 
-#: ./bot/bot.py:54
+#: ../telegram-ai-chatbot/bot/bot.py:52
 msgid "start a new conversation"
 msgstr "开始新对话"
 
-#: ./bot/bot.py:55
+#: ../telegram-ai-chatbot/bot/bot.py:53
 msgid "check balance"
 msgstr "查看余额"
 
-#: ./bot/bot.py:56
-msgid "settings"
-msgstr "设置"
+#: ../telegram-ai-chatbot/bot/bot.py:61
+msgid "use GPT-3.5 model"
+msgstr "使用 GPT-3.5模型"
 
-#: ./bot/bot.py:135 ./bot/bot.py:213
+#: ../telegram-ai-chatbot/bot/bot.py:62
+msgid "use GPT-4 model"
+msgstr "使用 GPT-4模型"
+
+#: ../telegram-ai-chatbot/bot/bot.py:63
+msgid "switch to ChatGPT mode"
+msgstr "切换到 ChatGPT 模式"
+
+#: ../telegram-ai-chatbot/bot/bot.py:64
+msgid "switch to Proofreader mode"
+msgstr "切换到校对模式"
+
+#: ../telegram-ai-chatbot/bot/bot.py:65
+msgid "switch to Dictionary mode"
+msgstr "切换到字典模式"
+
+#: ../telegram-ai-chatbot/bot/bot.py:144 ../telegram-ai-chatbot/bot/bot.py:204
 msgid "Check balance"
 msgstr "查看余额"
 
-#: ./bot/bot.py:138
+#: ../telegram-ai-chatbot/bot/bot.py:147
 msgid "✅ {:,} free tokens have been credited"
 msgstr "✅ {:,} 免费代币已存入"
 
-#: ./bot/bot.py:154
-msgid "😅 No conversation history to retry"
-msgstr "😅 没有要重试的对话历史记录"
+#: ../telegram-ai-chatbot/bot/bot.py:180
+msgid "Temporary server failure, please try again later."
+msgstr "服务器暂时故障，请稍后重试。"
 
-#: ./bot/bot.py:189
-msgid "Temporary OpenAI server failure, please try again later."
-msgstr "OpenAI 服务器暂时性故障，请稍后重试。"
-
-#: ./bot/bot.py:193
+#: ../telegram-ai-chatbot/bot/bot.py:184
 msgid "Reason: Rate limit reached"
 msgstr "原因：达到速率限制"
 
-#: ./bot/bot.py:196
-msgid "Your request may violate OpenAI's policies. Please modify your prompt and retry."
+#: ../telegram-ai-chatbot/bot/bot.py:187
+msgid ""
+"Your request may violate OpenAI's policies. Please modify your prompt and"
+" retry."
 msgstr "你的请求可能违反了 OpenAI 的政策。请修改您的提示并重试。"
 
-#: ./bot/bot.py:200 ./bot/bot.py:691
+#: ../telegram-ai-chatbot/bot/bot.py:191 ../telegram-ai-chatbot/bot/bot.py:717
 msgid "Reason: {}"
 msgstr "原因： {}"
 
-#: ./bot/bot.py:217
+#: ../telegram-ai-chatbot/bot/bot.py:208
 msgid "Insufficient tokens."
 msgstr "代币不足。"
 
-#: ./bot/bot.py:219
+#: ../telegram-ai-chatbot/bot/bot.py:210
 msgid "Require {} tokens to process this message"
 msgstr "需要 {} 代币来处理此消息"
 
-#: ./bot/bot.py:296
+#: ../telegram-ai-chatbot/bot/bot.py:292
 msgid "Decoding voice message ..."
 msgstr "解码语音信息 ..."
 
-#: ./bot/bot.py:320
+#: ../telegram-ai-chatbot/bot/bot.py:316
 msgid "Voice data size exceeds 20MB limit"
 msgstr "语音数据大小超过 20MB 限制"
 
-#: ./bot/bot.py:397 ./bot/bot.py:830
+#: ../telegram-ai-chatbot/bot/bot.py:393 ../telegram-ai-chatbot/bot/bot.py:856
 msgid "Retry"
 msgstr "重试"
 
-#: ./bot/bot.py:423
-msgid "⚠️ This chat has exceeded the rate limit. Please wait for up to 60 seconds."
+#: ../telegram-ai-chatbot/bot/bot.py:419
+msgid ""
+"⚠️ This chat has exceeded the rate limit. Please wait for up to 60 "
+"seconds."
 msgstr "⚠️ 此聊天已超出速率限制。请等待最多 60 秒。"
 
-#: ./bot/bot.py:459
-msgid "⚠️ Transcripts for this video are not available, possibly due to access restrictions or transcript disablement."
+#: ../telegram-ai-chatbot/bot/bot.py:461
+msgid ""
+"⚠️ Transcripts for this video are not available, possibly due to access "
+"restrictions or transcript disablement."
 msgstr "⚠️ 此视频的转录本不可用，可能是由于访问限制或转录本禁用。"
 
-#: ./bot/bot.py:465
-msgid "⚠️ Failed to fetch the website content, possibly due to access restrictions."
+#: ../telegram-ai-chatbot/bot/bot.py:467
+msgid ""
+"⚠️ Failed to fetch the website content, possibly due to access "
+"restrictions."
 msgstr "⚠️ 无法获取网站内容，可能是因为访问限制。"
 
-#: ./bot/bot.py:491
-msgid "⚠️ Sorry, the message is too long for {}. Please reduce the length of the input data."
+#: ../telegram-ai-chatbot/bot/bot.py:497
+msgid ""
+"⚠️ Sorry, the message is too long for {}. Please reduce the length of the"
+" input data."
 msgstr "⚠️ 抱歉，该消息对于 {} 来说太长。请减少输入数据的长度。"
 
-#: ./bot/bot.py:499
+#: ../telegram-ai-chatbot/bot/bot.py:500
+msgid ""
+"⚠️ Sorry, the content from the link is too long for {}. Please try "
+"another link."
+msgstr "⚠️ 抱歉，链接内容对于 {} 来说太长。请尝试另一个链接。"
+
+#: ../telegram-ai-chatbot/bot/bot.py:508
 msgid "Now you can ask me about the content in the link:"
 msgstr "现在你可以向我询问链接中的内容："
 
-#: ./bot/bot.py:503
+#: ../telegram-ai-chatbot/bot/bot.py:512
 msgid "The cost of the next answers will be more than {} tokens"
 msgstr "下一个答案的成本将超过 {} 个代币"
 
-#: ./bot/bot.py:504
-msgid "To reduce costs, you can use the /reset command to remove the data from the context"
+#: ../telegram-ai-chatbot/bot/bot.py:513
+msgid ""
+"To reduce costs, you can use the /reset command to remove the data from "
+"the context"
 msgstr "为了降低成本，可以使用 /reset 命令从上下文中删除数据"
 
-#: ./bot/bot.py:505
+#: ../telegram-ai-chatbot/bot/bot.py:514
 msgid "Notice"
 msgstr "注意"
 
-#: ./bot/bot.py:508
+#: ../telegram-ai-chatbot/bot/bot.py:517
 msgid "Summarize"
 msgstr "总结"
 
-#: ./bot/bot.py:509
+#: ../telegram-ai-chatbot/bot/bot.py:518
 msgid "Cancel"
 msgstr "取消"
 
-#: ./bot/bot.py:593
-msgid "⚠️ The answer was too long, has been splitted into multiple unformatted messages"
+#: ../telegram-ai-chatbot/bot/bot.py:615
+msgid ""
+"⚠️ The answer was too long, has been splitted into multiple unformatted "
+"messages"
 msgstr "⚠️ 答案太长，被拆分成多条未格式化的信息"
 
-#: ./bot/bot.py:649
+#: ../telegram-ai-chatbot/bot/bot.py:675
 msgid "Recording ..."
 msgstr "录音中 ..."
 
-#: ./bot/bot.py:670
+#: ../telegram-ai-chatbot/bot/bot.py:696
 msgid "Text"
 msgstr "文本"
 
-#: ./bot/bot.py:680
-msgid "The voice message could not be created. Voice messages are only valid in English."
+#: ../telegram-ai-chatbot/bot/bot.py:706
+msgid ""
+"The voice message could not be created. Voice messages are only valid in "
+"English."
 msgstr "无法创建语音消息。语音消息仅适用于英语。"
 
-#: ./bot/bot.py:690
+#: ../telegram-ai-chatbot/bot/bot.py:716
 msgid "Failed to generate the voice message, please try again later."
 msgstr "生成语音信息失败，请稍后重试。"
 
-#: ./bot/bot.py:703
+#: ../telegram-ai-chatbot/bot/bot.py:729
 msgid ""
-"summarize the transcript from {} containing abstract, list of key points and the conclusion\n"
+"summarize the transcript from {} containing abstract, list of key points "
+"and the conclusion\n"
 "\n"
 "transcript:\n"
 "{}"
 msgstr "总结来自 {} 的抄本，包含摘要、关键点列表和结论\n\n抄本：\n{}"
 
-#: ./bot/bot.py:705
+#: ../telegram-ai-chatbot/bot/bot.py:731
 msgid ""
-"summarize the content from {} containing abstract, list of key points and the conclusion\n"
+"summarize the content from {} containing abstract, list of key points and"
+" the conclusion\n"
 "\n"
 "original content:\n"
 "{}"
 msgstr "总结来自 {} 的内容，包含摘要、要点列表和结论\n\n原始内容：\n{}"
 
-#: ./bot/bot.py:739
+#: ../telegram-ai-chatbot/bot/bot.py:765
 msgid "💡 Please type /image and followed by the image prompt"
 msgstr "💡 请输入 /image 然后输入图片提示"
 
-#: ./bot/bot.py:742
+#: ../telegram-ai-chatbot/bot/bot.py:768
 msgid "<b>Example:</b>"
 msgstr "<b>例子：</b>"
 
-#: ./bot/bot.py:743
+#: ../telegram-ai-chatbot/bot/bot.py:769
 msgid "Some AI Models only support English prompt"
 msgstr "部分AI模型仅支持英文提示"
 
-#: ./bot/bot.py:748 ./bot/ui.py:455
+#: ../telegram-ai-chatbot/bot/bot.py:774 ../telegram-ai-chatbot/bot/ui.py:448
 msgid "Learn"
 msgstr "学习"
 
-#: ./bot/bot.py:755
+#: ../telegram-ai-chatbot/bot/bot.py:781
 msgid "Inappropriate prompt. Please modify your prompt and retry."
 msgstr "不当提示。请修改您的提示并重试。"
 
-#: ./bot/bot.py:783 ./bot/bot.py:789 ./bot/bot.py:870
+#: ../telegram-ai-chatbot/bot/bot.py:809 ../telegram-ai-chatbot/bot/bot.py:815
+#: ../telegram-ai-chatbot/bot/bot.py:896
 msgid "Outdated command"
 msgstr "过时的命令"
 
-#: ./bot/bot.py:797 ./bot/bot.py:890
-msgid "⚠️ It is only possible to generate one image at a time. Please wait for {} seconds to retry."
+#: ../telegram-ai-chatbot/bot/bot.py:823 ../telegram-ai-chatbot/bot/bot.py:916
+msgid ""
+"⚠️ It is only possible to generate one image at a time. Please wait for "
+"{} seconds to retry."
 msgstr "⚠️ 一次只能生成一张图像。请等待 {} 秒重试。"
 
-#: ./bot/bot.py:803 ./bot/bot.py:895
+#: ../telegram-ai-chatbot/bot/bot.py:829 ../telegram-ai-chatbot/bot/bot.py:921
 msgid "👨‍🎨 painting ..."
 msgstr "👨‍🎨 正在画 ..."
 
-#: ./bot/bot.py:829
+#: ../telegram-ai-chatbot/bot/bot.py:855
 msgid "Prompt"
 msgstr "提词"
 
-#: ./bot/bot.py:842
+#: ../telegram-ai-chatbot/bot/bot.py:868
 msgid "Upscale"
 msgstr "放大"
 
-#: ./bot/bot.py:852 ./bot/bot.py:915
+#: ../telegram-ai-chatbot/bot/bot.py:878 ../telegram-ai-chatbot/bot/bot.py:941
 msgid "Server error. Please try again later."
 msgstr "服务器错误。请稍后再试。"
 
-#: ./bot/bot.py:879
+#: ../telegram-ai-chatbot/bot/bot.py:905
 msgid "Upscaling images with real-esrgan-4x can be expensive."
 msgstr "使用 real-esrgan-4x 放大图像可能会很昂贵。"
 
-#: ./bot/bot.py:882
+#: ../telegram-ai-chatbot/bot/bot.py:908
 msgid "Upscale - {} tokens"
 msgstr "放大 - {} 代币"
 
-#: ./bot/bot.py:965
+#: ../telegram-ai-chatbot/bot/bot.py:991
 msgid "ℹ️ You are using {} model ..."
 msgstr "ℹ️ 您正在使用 {} 模型..."
 
-#: ./bot/bot.py:969
+#: ../telegram-ai-chatbot/bot/bot.py:995
 msgid "NOTE: GPT-4 is expensive, so please use it carefully."
 msgstr "注意：GPT-4 价格昂贵，请谨慎使用。"
 
-#: ./bot/bot.py:975
+#: ../telegram-ai-chatbot/bot/bot.py:1001
 msgid "Change AI model"
 msgstr "改变AI模型"
 
-#: ./bot/bot.py:1017
+#: ../telegram-ai-chatbot/bot/bot.py:1043
 msgid "Change chat mode"
 msgstr "更改聊天模式"
 
-#: ./bot/bot.py:1023
+#: ../telegram-ai-chatbot/bot/bot.py:1049
 msgid "I have already forgotten what we previously talked about."
 msgstr "我已经忘记了我们之前谈过的事情。"
 
-#: ./bot/bot.py:1033
+#: ../telegram-ai-chatbot/bot/bot.py:1052
+msgid "greeting"
+msgstr "问候语"
+
+#: ../telegram-ai-chatbot/bot/bot.py:1061
 msgid "You're now chatting with {} ({}) ..."
 msgstr "您现在正在与 {} ({}) 聊天..."
 
-#: ./bot/bot.py:1044
-msgid "To continue the conversation in the group chat, please \"reply\" to my messages."
+#: ../telegram-ai-chatbot/bot/bot.py:1072
+msgid ""
+"To continue the conversation in the group chat, please \"reply\" to my "
+"messages."
 msgstr "要在群聊中继续对话，请“回复”我的信息。"
 
-#: ./bot/bot.py:1045
-msgid "Please \"SLOW DOWN\" interactions with the chatbot as group chats can easily exceed the Telegram rate limit. "
+#: ../telegram-ai-chatbot/bot/bot.py:1073
+msgid ""
+"Please \"SLOW DOWN\" interactions with the chatbot as group chats can "
+"easily exceed the Telegram rate limit. "
 msgstr "请“放慢”与聊天机器人的互动，因为群聊很容易超过 Telegram 速率限制。"
 
-#: ./bot/bot.py:1046
-msgid "Once this chat exceeds the rate limit, the chatbot won't respond temporarily."
+#: ../telegram-ai-chatbot/bot/bot.py:1074
+msgid ""
+"Once this chat exceeds the rate limit, the chatbot won't respond "
+"temporarily."
 msgstr "一旦本次聊天超过限速，聊天机器人将暂时不响应。"
 
-#: ./bot/bot.py:1073
-msgid "🔒 For privacy reason, your balance won't show in a group chat. Please use /balance command in @{}."
+#: ../telegram-ai-chatbot/bot/bot.py:1079
+msgid "Hello! How can I assist you today?"
+msgstr "你好！今天我能为您提供什么帮助？"
+
+#: ../telegram-ai-chatbot/bot/bot.py:1108
+msgid ""
+"🔒 For privacy reason, your balance won't show in a group chat. Please use"
+" /balance command in @{}."
 msgstr "🔒 出于隐私原因，您的余额不会在群聊中显示。请在 @{} 中使用 /balance 命令。"
 
-#: ./bot/bot.py:1082
+#: ../telegram-ai-chatbot/bot/bot.py:1117
 msgid ""
 "👛 <b>Balance</b>\n"
 "\n"
 msgstr "👛 <b>余额</b>\n\n"
 
-#: ./bot/bot.py:1083
-msgid ""
-"<b>{:,}</b> tokens left\n"
+#: ../telegram-ai-chatbot/bot/bot.py:1118
+msgid "<b>{:,}</b> tokens left\n"
 msgstr "剩余 <b>{:,}</b> 个代币额度\n"
 
-#: ./bot/bot.py:1084
+#: ../telegram-ai-chatbot/bot/bot.py:1119
 msgid "<i>You used <b>{:,}</b> tokens</i>"
 msgstr "<i>您使用了 <b>{:,}</b> 个代币</i>"
 
-#: ./bot/bot.py:1088
+#: ../telegram-ai-chatbot/bot/bot.py:1123
 msgid "The longer conversation would spend more tokens"
 msgstr "对话越长，花费的代币越多"
 
-#: ./bot/bot.py:1089
+#: ../telegram-ai-chatbot/bot/bot.py:1124
 msgid "/reset to clear history manually"
 msgstr "/reset 手动清除历史记录"
 
-#: ./bot/bot.py:1090
-msgid "Most GPT-3.5 users spend about 200,000 tokens per month"
-msgstr "大多数 GPT-3.5 用户每月花费约 200,000 个代币"
-
-#: ./bot/bot.py:1091
-msgid "Most GPT-4 users spend about 2,000,000 tokens per month"
-msgstr "大多数 GPT-4 用户每月花费约 2,000,000 个代币"
-
-#: ./bot/bot.py:1092
-msgid "Around 500 images can be generated from one million tokens."
-msgstr "一百万个代币可以生成大约 500 张图像。"
-
-#: ./bot/bot.py:1144
+#: ../telegram-ai-chatbot/bot/bot.py:1176
 msgid "💡 Only accept number between 0.1 to 100"
 msgstr "💡 只接受 0.1 到 100 之间的数字"
 
-#: ./bot/bot.py:1147
+#: ../telegram-ai-chatbot/bot/bot.py:1179
 msgid ""
 "🛒 Choose the payment method\n"
 "\n"
 msgstr "🛒 选择付款方式\n\n"
 
-#: ./bot/bot.py:1148
-msgid ""
-"💳 Debit or Credit Card - support 200+ countries/regions\n"
+#: ../telegram-ai-chatbot/bot/bot.py:1180
+msgid "💳 Debit or Credit Card - support 200+ countries/regions\n"
 msgstr "💳 借记卡或信用卡 - 支持 200 多个国家/地区\n"
 
-#: ./bot/bot.py:1150
-msgid ""
-"💎 Crypto - BTC, USDT, USDC, TON, BNB\n"
+#: ../telegram-ai-chatbot/bot/bot.py:1182
+msgid "💎 Crypto - BTC, USDT, USDC, TON, BNB\n"
 msgstr "💎 加密货币 - BTC、USDT、USDC、TON、BNB\n"
 
-#: ./bot/bot.py:1152
+#: ../telegram-ai-chatbot/bot/bot.py:1184
 msgid "💳 Debit or Credit Card"
 msgstr "💳 借记卡或信用卡"
 
-#: ./bot/bot.py:1153
+#: ../telegram-ai-chatbot/bot/bot.py:1185
 msgid "💎 Crypto"
 msgstr "💎 加密货币"
 
-#: ./bot/bot.py:1176
+#: ../telegram-ai-chatbot/bot/bot.py:1208
 msgid "📋 Creating an invoice ..."
 msgstr "📋 创建发票 ..."
 
-#: ./bot/bot.py:1183
+#: ../telegram-ai-chatbot/bot/bot.py:1215
 msgid ""
 "📋 <b>Your invoice</b>:\n"
 "\n"
 msgstr "📋 <b>您的发票</b>：\n\n"
 
-#: ./bot/bot.py:1188
-msgid ""
-"💡 <b>Tips</b>:\n"
+#: ../telegram-ai-chatbot/bot/bot.py:1220
+msgid "💡 <b>Tips</b>:\n"
 msgstr "💡 <b>提示</b>：\n"
 
-#: ./bot/bot.py:1194
-msgid "If you do not have a PayPal account, click on the button located below the login button to pay with cards directly."
+#: ../telegram-ai-chatbot/bot/bot.py:1226
+msgid ""
+"If you do not have a PayPal account, click on the button located below "
+"the login button to pay with cards directly."
 msgstr "如果您没有贝宝 (PayPal) 帐户，请单击登录按钮下方的按钮直接使用卡片付款。 (支持 🇨🇳 银行卡)"
 
-#: ./bot/bot.py:1195
+#: ../telegram-ai-chatbot/bot/bot.py:1227
 msgid "💳 Pay with Debit or Credit Card"
 msgstr "💳 用借记卡或信用卡支付"
 
-#: ./bot/bot.py:1197
-msgid "If you have any issues related to crypto payment, please contact the customer service in the payment page, or send messages to {} directly for assistance."
+#: ../telegram-ai-chatbot/bot/bot.py:1229
+msgid ""
+"If you have any issues related to crypto payment, please contact the "
+"customer service in the payment page, or send messages to {} directly for"
+" assistance."
 msgstr "如果您有任何与加密支付相关的问题，请在支付页面联系客服，或直接发送信息至 {} 寻求帮助。"
 
-#: ./bot/bot.py:1198
+#: ../telegram-ai-chatbot/bot/bot.py:1230
 msgid "💎 Pay with Crypto"
 msgstr "💎 用加密支付"
 
-#: ./bot/bot.py:1200
+#: ../telegram-ai-chatbot/bot/bot.py:1232
 msgid "Tokens will be credited within 10 minutes of payment."
 msgstr "代币额度将在付款后 10 分钟内存入。"
 
-#: ./bot/bot.py:1201
+#: ../telegram-ai-chatbot/bot/bot.py:1233
 msgid "Please contact @{} if tokens are not received after 1 hour of payment."
 msgstr "如果付款 1 小时后仍未收到代币额度，请联系 @{}。"
 
-#: ./bot/bot.py:1209
+#: ../telegram-ai-chatbot/bot/bot.py:1241
 msgid "⚠️ Failed to create an invoice, please try again later."
 msgstr "⚠️ 发票创建失败，请稍后重试。"
 
-#: ./bot/bot.py:1252
+#: ../telegram-ai-chatbot/bot/bot.py:1284
 msgid ""
 "<b>💰 Earn</b>\n"
 "\n"
 msgstr "<b>💰 赚取</b>\n\n"
 
-#: ./bot/bot.py:1254
+#: ../telegram-ai-chatbot/bot/bot.py:1286
+#, python-format
 msgid ""
 "Get %s%% rewards from the referred payments\n"
 "\n"
 msgstr "从推荐的付款中获得 %s%% 的奖励\n\n"
 
-#: ./bot/bot.py:1255
-msgid ""
-"Unused rewards: ${:,.2f}\n"
+#: ../telegram-ai-chatbot/bot/bot.py:1287
+msgid "Unused rewards: ${:,.2f}\n"
 msgstr "未使用的奖励：${:,.2f}\n"
 
-#: ./bot/bot.py:1256
+#: ../telegram-ai-chatbot/bot/bot.py:1288
 msgid ""
 "Total earned: ${:,.2f}\n"
 "\n"
 msgstr "总获得的奖厉：${:,.2f}\n\n"
 
-#: ./bot/bot.py:1257
-msgid ""
-"Referral link:\n"
+#: ../telegram-ai-chatbot/bot/bot.py:1289
+msgid "Referral link:\n"
 msgstr "推荐链接：\n"
 
-#: ./bot/bot.py:1259
+#: ../telegram-ai-chatbot/bot/bot.py:1291
 msgid ""
 "<i>You have referred {:,} new users</i>\n"
 "\n"
 msgstr "<i>您推荐了 {:,} 个新用户</i>\n\n"
 
-#: ./bot/bot.py:1260
-msgid "<i>💡 Refer the new users via your referral link, and you'll get a reward when they make a payment.</i>"
+#: ../telegram-ai-chatbot/bot/bot.py:1292
+msgid ""
+"<i>💡 Refer the new users via your referral link, and you'll get a reward "
+"when they make a payment.</i>"
 msgstr "<i>💡 通过您的推荐链接推荐新用户，当他们付款时您将获得奖励。</i>"
 
-#: ./bot/bot.py:1262
+#: ../telegram-ai-chatbot/bot/bot.py:1294
 msgid "⚠️ Server error, please try again later."
 msgstr "⚠️ 服务器错误，请稍后重试。"
 
-#: ./bot/bot.py:1271
+#: ../telegram-ai-chatbot/bot/bot.py:1303
 msgid "💡 Edited messages won't take effects"
 msgstr "💡 编辑的信息不会生效"
 
-#: ./bot/config.py:21
+#: ../telegram-ai-chatbot/bot/config.py:24
 msgid "Hi! This is ChatGPT. How can I assist you today?"
 msgstr "你好！这是 ChatGPT。今天我能为您提供什么帮助？"
 
-#: ./bot/config.py:27
+#: ../telegram-ai-chatbot/bot/config.py:30
 msgid "Proofreader"
 msgstr "文本校对专家"
 
-#: ./bot/config.py:29
-msgid "Hi, I'm Proofreader. Now you can give me any text in any languages, I will help you check grammar, spelling and wording usage, then rephrase it and do proofreading."
+#: ../telegram-ai-chatbot/bot/config.py:32
+msgid ""
+"Hi, I'm Proofreader. Now you can give me any text in any languages, I "
+"will help you check grammar, spelling and wording usage, then rephrase it"
+" and do proofreading."
 msgstr "您好，我是校对员。现在你可以给我任何语言的任何文本，我会帮你检查语法、拼写和用词用法，然后改写并进行校对。"
 
-#: ./bot/config.py:39
+#: ../telegram-ai-chatbot/bot/config.py:42
 msgid "Dictionary"
 msgstr "字典"
 
-#: ./bot/config.py:41
-msgid "This is a dictionary where you can search for any words or phrases in various languages."
+#: ../telegram-ai-chatbot/bot/config.py:44
+msgid ""
+"This is a dictionary where you can search for any words or phrases in "
+"various languages."
 msgstr "这是一本字典，您可以在其中搜索各种语言的任何单词或短语。"
 
-#: ./bot/gen_image_utils.py:18
+#: ../telegram-ai-chatbot/bot/gen_image_utils.py:18
 msgid "The price is for one image"
 msgstr "价格是一张图片"
 
-#: ./bot/gen_image_utils.py:19
+#: ../telegram-ai-chatbot/bot/gen_image_utils.py:19
 msgid "Any languages"
 msgstr "任何语言"
 
-#: ./bot/getimg_utils.py:23 ./bot/replicate_utils.py:26
+#: ../telegram-ai-chatbot/bot/getimg_utils.py:23
+#: ../telegram-ai-chatbot/bot/replicate_utils.py:26
 msgid "The price is for 1 image"
 msgstr "该价格为 1 张图片的价格"
 
-#: ./bot/getimg_utils.py:24 ./bot/replicate_utils.py:27
-#: ./bot/sinkinai_utils.py:26
+#: ../telegram-ai-chatbot/bot/getimg_utils.py:24
+#: ../telegram-ai-chatbot/bot/replicate_utils.py:27
+#: ../telegram-ai-chatbot/bot/sinkinai_utils.py:26
 msgid "Use English prompt to get better results"
 msgstr "使用英文提示以获得更好的结果"
 
-#: ./bot/getimg_utils.py:60
+#: ../telegram-ai-chatbot/bot/getimg_utils.py:60
 msgid "Photorealistic"
 msgstr "真实感"
 
-#: ./bot/getimg_utils.py:72
+#: ../telegram-ai-chatbot/bot/getimg_utils.py:72
 msgid "Unreal (2.5D)"
 msgstr "虚幻 (2.5D)"
 
-#: ./bot/getimg_utils.py:84
+#: ../telegram-ai-chatbot/bot/getimg_utils.py:84
 msgid "Anime"
 msgstr "日本动画片"
 
-#: ./bot/sinkinai_utils.py:25
+#: ../telegram-ai-chatbot/bot/sinkinai_utils.py:25
 msgid "The price is for 2 images"
 msgstr "价格为 2 张图片"
 
-#: ./bot/ui.py:110
+#: ../telegram-ai-chatbot/bot/ui.py:75 ../telegram-ai-chatbot/bot/ui.py:485
+msgid "name"
+msgstr "姓名"
+
+#: ../telegram-ai-chatbot/bot/ui.py:110
 msgid "Instant access, ex: {}"
 msgstr "即时访问，例如：{}"
 
-#: ./bot/ui.py:112
+#: ../telegram-ai-chatbot/bot/ui.py:112
 msgid "Low cost, no chat history"
 msgstr "低成本，无聊天记录"
 
-#: ./bot/ui.py:114
+#: ../telegram-ai-chatbot/bot/ui.py:114
 msgid "Voice messages (English), check /settings"
 msgstr "语音信息（英语），检查 /settings"
 
-#: ./bot/ui.py:120
+#: ../telegram-ai-chatbot/bot/ui.py:120
 msgid "<b>Features</b>"
 msgstr "<b>特点</b>"
 
-#: ./bot/ui.py:124
+#: ../telegram-ai-chatbot/bot/ui.py:124
 msgid "desktop: type /{}, then press TAB key"
 msgstr "桌面：键入 /{}，然后按 TAB 键"
 
-#: ./bot/ui.py:125
+#: ../telegram-ai-chatbot/bot/ui.py:125
 msgid "mobile: type /{}, then long press the command"
 msgstr "手机：输入 /{}，然后长按命令"
 
-#: ./bot/ui.py:126
+#: ../telegram-ai-chatbot/bot/ui.py:126
 msgid "<b>How to do instant access?</b>"
 msgstr "<b>如何做到即时访问？</b>"
 
-#: ./bot/ui.py:141
+#: ../telegram-ai-chatbot/bot/ui.py:141
 msgid "AI Model"
 msgstr "人工智能模型"
 
-#: ./bot/ui.py:143 ./bot/ui.py:156
+#: ../telegram-ai-chatbot/bot/ui.py:143 ../telegram-ai-chatbot/bot/ui.py:156
 msgid "🤥 Some characters are made up! Don't take them too seriously."
 msgstr "🤥 有些角色是虚构的！不要把他们太当回事。"
 
-#: ./bot/ui.py:144 ./bot/ui.py:157
+#: ../telegram-ai-chatbot/bot/ui.py:144 ../telegram-ai-chatbot/bot/ui.py:157
 msgid "🤩 More roles are coming soon. Stay tuned!"
 msgstr "🤩 更多角色即将推出。敬请关注！"
 
-#: ./bot/ui.py:154
+#: ../telegram-ai-chatbot/bot/ui.py:154
 msgid "Chat Mode"
 msgstr "聊天模式"
 
-#: ./bot/ui.py:223
+#: ../telegram-ai-chatbot/bot/ui.py:223
 msgid "Language"
 msgstr "语言"
 
-#: ./bot/ui.py:224
+#: ../telegram-ai-chatbot/bot/ui.py:224
 msgid ""
 "This setting won't effect the answers from the chatbot.\n"
 "\n"
 "Please feedback to @{} if there is any translation errors."
 msgstr "此设置不会影响聊天机器人的回答。\n\n如果有任何翻译错误，请反馈给 @{}。"
 
-#: ./bot/ui.py:248
+#: ../telegram-ai-chatbot/bot/ui.py:248
 msgid "Not specify"
 msgstr "不指定"
 
-#: ./bot/ui.py:261
+#: ../telegram-ai-chatbot/bot/ui.py:261
 msgid "<b>Tips</b>"
 msgstr "<b>提示</b>"
 
-#: ./bot/ui.py:365
+#: ../telegram-ai-chatbot/bot/ui.py:365
 msgid "Back"
 msgstr "返回"
 
-#: ./bot/ui.py:367
+#: ../telegram-ai-chatbot/bot/ui.py:367
 msgid "Close"
 msgstr "关闭"
 
-#: ./bot/ui.py:409
+#: ../telegram-ai-chatbot/bot/ui.py:409
 msgid "Configure"
 msgstr "配置"
 
-#: ./bot/ui.py:415
+#: ../telegram-ai-chatbot/bot/ui.py:415
 msgid "About"
 msgstr "关于"
 
-#: ./bot/ui.py:421 ./bot/ui.py:454
+#: ../telegram-ai-chatbot/bot/ui.py:421 ../telegram-ai-chatbot/bot/ui.py:447
 msgid "Settings"
 msgstr "设置"
 
-#: ./bot/ui.py:431
-msgid "Hi! My name is Nexia, an AI chatbot powered by OpenAI's GPT, DALL·E and Stable Diffusion models."
+#: ../telegram-ai-chatbot/bot/ui.py:431
+msgid ""
+"Hi! My name is Nexia, an AI chatbot powered by OpenAI's GPT, DALL·E and "
+"Stable Diffusion models."
 msgstr "你好！我叫 Nexia，一个由 OpenAI 的 GPT、DALL·E 和 Stable Diffusion 模型提供支持的 AI 聊天机器人。"
 
-#: ./bot/ui.py:433
+#: ../telegram-ai-chatbot/bot/ui.py:433
+msgid "<b>Additional features</b>\n"
+msgstr "<b>附加功能</b>\n"
+
+#: ../telegram-ai-chatbot/bot/ui.py:434
+msgid "🧙‍♀️ Customizable chatbot\n"
+msgstr "🧙‍​​♀️ 可定制的聊天机器人\n"
+
+#: ../telegram-ai-chatbot/bot/ui.py:435
+msgid "🎙 Support voice messages\n"
+msgstr "🎙 支持语音留言\n"
+
+#: ../telegram-ai-chatbot/bot/ui.py:436
+msgid "🌐 Summarize the content in links"
+msgstr "🌐 总结链接中的内容"
+
+#: ../telegram-ai-chatbot/bot/ui.py:437
+msgid "🎬 Summarize Youtube videos (up to 20 minutes long)"
+msgstr "🎬 总结 Youtube 视频（最长 20 分钟）"
+
+#: ../telegram-ai-chatbot/bot/ui.py:438
 msgid ""
-"<b>What can I do for you?</b>\n"
-msgstr "<b>我能为您做什么？</b>\n"
+"👥 Group chat - add this bot to a group chat, then type /chatgpt to start."
+"\n"
+msgstr "👥 群聊 - 将此机器人添加到群聊中，然后输入 /chatgpt 开始。\n"
 
-#: ./bot/ui.py:434
+#: ../telegram-ai-chatbot/bot/ui.py:439
+msgid "rewrite sentences\n"
+msgstr "重写句子\n"
+
+#: ../telegram-ai-chatbot/bot/ui.py:440
+msgid "learn about words/phrases\n"
+msgstr "了解单词/短语\n"
+
+#: ../telegram-ai-chatbot/bot/ui.py:441
+msgid "generate images from text\n"
+msgstr "从文本生成图像\n"
+
+#: ../telegram-ai-chatbot/bot/ui.py:443
 msgid ""
-"✉️ Writing\n"
-msgstr "✉️ 写作\n"
-
-#: ./bot/ui.py:435
-msgid ""
-"🗂 Summarize\n"
-msgstr "🗂 总结\n"
-
-#: ./bot/ui.py:436
-msgid ""
-"🌎 Translate\n"
-msgstr "🌎 翻译\n"
-
-#: ./bot/ui.py:437
-msgid ""
-"🤔 Provide ideas and solve problems\n"
-msgstr "🤔 提供思路，解决问题\n"
-
-#: ./bot/ui.py:438
-msgid ""
-"💻 Programming and debugging\n"
-msgstr "💻 编程和调试\n"
-
-#: ./bot/ui.py:440
-msgid ""
-"<b>More than ChatGPT</b>\n"
-msgstr "<b>不仅仅是 ChatGPT</b>\n"
-
-#: ./bot/ui.py:441
-msgid ""
-"🎙 Support voice messages (100 tokens/s when exceeding 10s)\n"
-msgstr "🎙 支持语音信息（超过 10 秒时，每秒 100 代币）\n"
-
-#: ./bot/ui.py:442
-msgid ""
-"✍️ Proofreading (/proofreader)\n"
-msgstr "✍️ 校对 (/proofreader)\n"
-
-#: ./bot/ui.py:443
-msgid ""
-"📔 Dictionary (/dictionary)\n"
-msgstr "📔 词典（/dictionary）\n"
-
-#: ./bot/ui.py:444
-msgid "🌐 Summarize the content of websites"
-msgstr "🌐 总结网站内容"
-
-#: ./bot/ui.py:445
-msgid "🎬 Summarize Youtube videos that are 20 minutes long"
-msgstr "🎬 总结 20 分钟长的 Youtube 视频"
-
-#: ./bot/ui.py:446
-msgid ""
-"👨‍🎨 Generate images (/image)\n"
-msgstr "👨‍🎨 生成图片 (/image)\n"
-
-#: ./bot/ui.py:447
-msgid ""
-"🧙‍♀️ Create custom roles\n"
-msgstr "🧙‍​​♀️ 创建自定义角色\n"
-
-#: ./bot/ui.py:448
-msgid ""
-"👥 Group chat - add @{} to a group chat, then use /chatgpt to start.\n"
-msgstr "👥 群聊 - 将 @{} 添加到群聊，然后使用 /chatgpt 启动。\n"
-
-#: ./bot/ui.py:450
-msgid "By using this chatbot, you agree to our <a href=\"{}\">terms of service</a> and <a href=\"{}\">privacy policy</a>."
+"By using this chatbot, you agree to our <a href=\"{}\">terms of "
+"service</a> and <a href=\"{}\">privacy policy</a>."
 msgstr "使用此聊天机器人即表示您同意我们的<a href=\"{}\">服务条款</a>和<a href=\"{}\">隐私政策</a>。"
 
-#: ./bot/ui.py:458
+#: ../telegram-ai-chatbot/bot/ui.py:451
 msgid "FAQ"
 msgstr "常问问题"
 
-#: ./bot/ui.py:459
+#: ../telegram-ai-chatbot/bot/ui.py:452
 msgid "Feedback"
 msgstr "反馈"
 
-#: ./bot/ui.py:486
+#: ../telegram-ai-chatbot/bot/ui.py:479
 msgid "Select the image size (width x height)"
 msgstr "选择图像尺寸（宽 x 高）"
 
-#: ./bot/ui.py:502
+#: ../telegram-ai-chatbot/bot/ui.py:495
 msgid "Generate images"
 msgstr "生成图像"
 
-#: ./bot/ui.py:504
+#: ../telegram-ai-chatbot/bot/ui.py:497
 msgid "Select painting style or AI model"
 msgstr "选择画风或 AI 模型"
 
