@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-12-22 13:07+0800\n"
+"POT-Creation-Date: 2023-12-27 07:10+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -312,11 +312,11 @@ msgstr "👛 <b>Баланс</b>\n\n"
 
 #: ../telegram-ai-chatbot/bot/bot.py:1118
 msgid "<b>{:,}</b> tokens left\n"
-msgstr "Осталось <b>{:,</b> токенов\n"
+msgstr "Осталось <b>{:,}</b> токенов\n"
 
 #: ../telegram-ai-chatbot/bot/bot.py:1119
 msgid "<i>You used <b>{:,}</b> tokens</i>"
-msgstr "<i>Вы использовали токены <b>{:,</b></i>"
+msgstr "<i>Вы использовали токены <b>{:,}</b></i>"
 
 #: ../telegram-ai-chatbot/bot/bot.py:1123
 msgid "The longer conversation would spend more tokens"
