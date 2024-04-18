@@ -5,12 +5,13 @@ import config
 
 MODEL_GPT_35_TURBO = "gpt-3.5-turbo"
 MODEL_GPT_4 = "gpt-4"
+MODEL_GPT_4_TURBO = "gpt-4-turbo"
 # MODEL_GPT_4_32K = "gpt-4-32k"
 
 SUPPORTED_MODELS = set(
     [
         MODEL_GPT_35_TURBO,
-        MODEL_GPT_4,
+        MODEL_GPT_4_TURBO,
         # MODEL_GPT_4_32K,
     ]
 )
@@ -48,6 +49,9 @@ def max_context_tokens(model):
         return 16384
     elif model == MODEL_GPT_4:
         return 8192
+    elif model == MODEL_GPT_4_TURBO:
+        # The intended value is 128,000, but a limit was imposed to avoid excessive expenses.
+        return 16384
     # elif model == MODEL_GPT_4_32K:
     #     return 32768
     else:

@@ -86,6 +86,8 @@ def cost_factors(model):
     if model == gemini_utils.MODEL_GEMINI_VISION:
         return 3, 3
     if model == openai_utils.MODEL_GPT_4:
+        return 15, 20
+    if model == openai_utils.MODEL_GPT_4_TURBO:
         return 10, 15
     # elif model == openai_utils.MODEL_GPT_4_32K:
     #     return 20, 20
@@ -140,9 +142,9 @@ async def send_message(
             else:
                 answer += content_delta
 
-            if model == openai_utils.MODEL_GPT_4:
-                # WORKAROUND: avoid reaching rate limit
-                await asyncio.sleep(0.1)
+            # if openai_utils.MODEL_GPT_4 in model:
+            #     # WORKAROUND: avoid reaching rate limit
+            #     await asyncio.sleep(0.1)
             yield False, answer, None
     else:
         answer = openai_utils.reply_content(r, model)
