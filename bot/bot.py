@@ -459,7 +459,7 @@ async def message_handle(
     elif "disable_history" in chat_mode:
         disable_history = True
         if cached_msg_id is None:
-            cached_message = update.effective_message.text
+            cached_message = message or update.effective_message.text
             if not cached_message.startswith("/"):
                 cached_message = "/{} {}".format(chat_mode_id, cached_message)
             cached_msg_id = db.cache_chat_message(cached_message)
