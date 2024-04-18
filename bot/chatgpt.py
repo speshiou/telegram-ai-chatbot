@@ -58,10 +58,13 @@ def build_prompt(
             )
         if model == gemini_utils.MODEL_GEMINI_VISION:
             prompt = openai_utils.prompt_from_chat_messages(
-                system_prompt, dialog_messages, new_message, openai_utils.MODEL_GPT_4
+                system_prompt,
+                dialog_messages,
+                new_message,
+                openai_utils.MODEL_GPT_4_TURBO,
             )
             num_prompt_tokens = openai_utils.num_tokens_from_messages(
-                prompt, openai_utils.MODEL_GPT_4
+                prompt, openai_utils.MODEL_GPT_4_TURBO
             )
         else:
             prompt = openai_utils.prompt_from_chat_messages(
@@ -106,7 +109,7 @@ async def send_message(
     if model == gemini_utils.MODEL_GEMINI_VISION:
         answer = gemini_utils.send_message(model, prompt, history, image=image)
         num_completion_tokens = openai_utils.num_tokens_from_string(
-            answer, model=openai_utils.MODEL_GPT_4
+            answer, model=openai_utils.MODEL_GPT_4_TURBO
         )
         yield True, answer, num_completion_tokens
         return
