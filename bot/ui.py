@@ -493,25 +493,7 @@ def about(_):
         """By using this chatbot, you agree to our <a href="{}">terms of service</a> and <a href="{}">privacy policy</a>."""
     ).format("https://nexia.chat/terms-of-service", "https://nexia.chat/privacy-policy")
 
-    reply_markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(
-                    "⚙️ " + _("Settings"), web_app=WebAppInfo(url=config.WEB_APP_URL)
-                ),
-                InlineKeyboardButton("💡 " + _("Learn"), url="https://t.me/nexia_news"),
-            ],
-            [
-                InlineKeyboardButton("❓ " + _("FAQ"), url="https://nexia.chat/faq"),
-                InlineKeyboardButton(
-                    "✉️ " + _("Feedback"),
-                    url="https://t.me/{}".format(config.SUPPORT_USER_NAME),
-                ),
-            ],
-        ]
-    )
-
-    return text, reply_markup
+    return text, None
 
 
 def image_menu(_, path=None):
