@@ -39,7 +39,10 @@ def num_tokens_from_string(string: str, model: str) -> int:
 
 def max_output_tokens(model: str, num_context_tokens: int = None):
     remaing = max_context_tokens(model) - num_context_tokens
-    if model == MODEL_GPT_35_TURBO:
+    if model in {
+        MODEL_GPT_35_TURBO,
+        MODEL_GPT_4_TURBO,
+    }:
         return min(4096, remaing)
     return remaing
 
