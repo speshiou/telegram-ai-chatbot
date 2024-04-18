@@ -9,7 +9,16 @@ import pathlib
 from datetime import datetime
 
 import telegram
-from telegram import Message, Chat, BotCommand, Update, User, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram import (
+    Message,
+    Chat,
+    BotCommand,
+    Update,
+    User,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    WebAppInfo,
+)
 from telegram.ext import (
     Application,
     ApplicationBuilder,
@@ -18,7 +27,7 @@ from telegram.ext import (
     MessageHandler,
     CallbackQueryHandler,
     filters,
-    ContextTypes
+    ContextTypes,
 )
 from telegram.constants import ParseMode, ChatAction
 
@@ -45,6 +54,7 @@ db = database.Database()
 logger = logging.getLogger(__name__)
 gemini_utils.init(config.CGP_PROJECT_ID)
 
+
 def get_commands(lang=i18n.DEFAULT_LOCALE):
     _ = i18n.get_text_func(lang)
     base_commands = [
@@ -65,7 +75,10 @@ def get_commands(lang=i18n.DEFAULT_LOCALE):
         BotCommand("dictionary", _("switch to Dictionary mode")),
     ] + base_commands
 
-async def register_user_if_not_exists(update: Update, context: CallbackContext, referred_by: int = None):
+
+async def register_user_if_not_exists(
+    update: Update, context: CallbackContext, referred_by: int = None
+):
     user = None
     if update.message:
         user = update.message.from_user
@@ -76,9 +89,11 @@ async def register_user_if_not_exists(update: Update, context: CallbackContext, 
     if not user:
         print(f"Unknown callback event: {update}")
         return
-    
+
     if not db.check_if_user_exists(user.id):
-        if referred_by and (user.id == referred_by or not db.check_if_user_exists(referred_by)):
+        if referred_by and (
+            user.id == referred_by or not db.check_if_user_exists(referred_by)
+        ):
             # referred by unknown user or self, unset referral
             referred_by = None
 
@@ -87,15 +102,22 @@ async def register_user_if_not_exists(update: Update, context: CallbackContext, 
             username=user.username,
             first_name=user.first_name,
             last_name=user.last_name,
-            referred_by=referred_by
+            referred_by=referred_by,
         )
-        db.inc_stats('new_users')
+        db.inc_stats("new_users")
         if referred_by:
             db.inc_user_referred_count(referred_by)
-            db.inc_stats('referral_new_users')
+            db.inc_stats("referral_new_users")
     return user
 
-async def reply_or_edit_text(update: Update, text: str, parse_mode: ParseMode = ParseMode.HTML, reply_markup = None, disable_web_page_preview = None):
+
+async def reply_or_edit_text(
+    update: Update,
+    text: str,
+    parse_mode: ParseMode = ParseMode.HTML,
+    reply_markup=None,
+    disable_web_page_preview=None,
+):
     if update.message:
         await update.message.reply_text(
             text,
@@ -112,6 +134,7 @@ async def reply_or_edit_text(update: Update, text: str, parse_mode: ParseMode = 
             disable_web_page_preview=disable_web_page_preview,
         )
 
+
 def get_text_func(user, chat_id):
     if user:
         lang = db.get_chat_lang(chat_id) or user.language_code
@@ -119,11 +142,12 @@ def get_text_func(user, chat_id):
         lang = None
     return i18n.get_text_func(lang)
 
+
 async def start_handle(update: Update, context: CallbackContext):
     chat = update.effective_chat
     if chat.type != Chat.PRIVATE:
         return
-    
+
     user_id = update.message.from_user.id
     is_new_user = not db.check_if_user_exists(user_id)
 
@@ -140,15 +164,22 @@ async def start_handle(update: Update, context: CallbackContext):
         await settings_handle(update, context, data="about")
 
     if is_new_user and update.message:
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("👛 " + _("Check balance"), callback_data="balance")]
-        ])
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        "👛 " + _("Check balance"), callback_data="balance"
+                    )
+                ]
+            ]
+        )
         await update.message.reply_text(
-            _("✅ {:,} free tokens have been credited").format(config.FREE_QUOTA), 
+            _("✅ {:,} free tokens have been credited").format(config.FREE_QUOTA),
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup,
-            )
+        )
     await set_chat_mode(update, context, reason="start")
+
 
 def parse_command(message):
     if not message.strip():
@@ -158,6 +189,7 @@ def parse_command(message):
         return m[1].strip()
     return None
 
+
 def strip_command(message):
     if not message.strip():
         return None
@@ -166,14 +198,20 @@ def strip_command(message):
         return m[2].strip()
     return None
 
-async def send_error(update: Update, context: CallbackContext, message: str = None, placeholder = None):
+
+async def send_error(
+    update: Update, context: CallbackContext, message: str = None, placeholder=None
+):
     text = "⚠️ " + message
     if placeholder is None:
         await update.effective_message.reply_text(text)
     else:
         await placeholder.edit_text(text)
 
-async def send_openai_error(update: Update, context: CallbackContext, e: Exception, placeholder = None):
+
+async def send_openai_error(
+    update: Update, context: CallbackContext, e: Exception, placeholder=None
+):
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
     _ = get_text_func(user, chat_id)
@@ -184,7 +222,9 @@ async def send_openai_error(update: Update, context: CallbackContext, e: Excepti
         text += " " + _("Reason: Rate limit reached")
     elif "policy" in error_msg:
         # replace Microsoft warnings
-        text = _("Your request may violate OpenAI's policies. Please modify your prompt and retry.")
+        text = _(
+            "Your request may violate OpenAI's policies. Please modify your prompt and retry."
+        )
     elif "JSONDecodeError" in error_msg:
         pass
     else:
@@ -196,33 +236,42 @@ async def send_openai_error(update: Update, context: CallbackContext, e: Excepti
     # printing stack trace
     traceback.print_exc()
 
-async def send_insufficient_tokens_warning(update: Update, user: User, message: str = None, estimated_cost: int = None):
+
+async def send_insufficient_tokens_warning(
+    update: Update, user: User, message: str = None, estimated_cost: int = None
+):
     chat_id = update.effective_chat.id
     _ = get_text_func(user, chat_id)
 
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton("👛 " + _("Check balance"), callback_data="balance")]
-    ])
+    reply_markup = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("👛 " + _("Check balance"), callback_data="balance")]]
+    )
 
     # TODO: show different messages for private and group chats
     text = "⚠️ " + _("Insufficient tokens.")
     if estimated_cost is not None:
-        text += " " + _("Require {} tokens to process this message").format(i18n.currency(estimated_cost))
+        text += " " + _("Require {} tokens to process this message").format(
+            i18n.currency(estimated_cost)
+        )
     await update.effective_message.reply_text(text, reply_markup=reply_markup)
+
 
 async def check_balance(update: Update, estimated_cost: int, user: User):
     remaining_tokens = db.get_user_remaining_tokens(user.id)
     if remaining_tokens < estimated_cost:
-        await send_insufficient_tokens_warning(update, user, estimated_cost=estimated_cost)
+        await send_insufficient_tokens_warning(
+            update, user, estimated_cost=estimated_cost
+        )
         return False
     return True
+
 
 async def common_command_handle(update: Update, context: CallbackContext):
     # check if message is edited
     if update.edited_message is not None:
         await edited_message_handle(update, context)
         return
-    
+
     user = await register_user_if_not_exists(update, context)
     if not user:
         return
@@ -239,7 +288,11 @@ async def common_command_handle(update: Update, context: CallbackContext):
         message = db.get_cached_message(cached_msg_id)
 
         if not message:
-            await update.effective_message.edit_text(update.effective_message.text, parse_mode=ParseMode.MARKDOWN, reply_markup=None)
+            await update.effective_message.edit_text(
+                update.effective_message.text,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=None,
+            )
             return
     else:
         message = update.message.text
@@ -251,7 +304,7 @@ async def common_command_handle(update: Update, context: CallbackContext):
         if config.ENABLE_SELECT_MODEL:
             await set_chat_model(update, context, command)
         return
-    
+
     if not config.ENABLE_CUSTOM_ROLE:
         return
 
@@ -262,13 +315,21 @@ async def common_command_handle(update: Update, context: CallbackContext):
         return
 
     if message:
-        await message_handle(update, context, message=message, chat_mode_id=chat_mode, cached_msg_id=cached_msg_id)
+        await message_handle(
+            update,
+            context,
+            message=message,
+            chat_mode_id=chat_mode,
+            cached_msg_id=cached_msg_id,
+        )
     else:
         await set_chat_mode(update, context, chat_mode)
     return
 
+
 def get_message_chunks(text, chuck_size=config.MESSAGE_MAX_LENGTH):
-    return [text[i:i + chuck_size] for i in range(0, len(text), chuck_size)]
+    return [text[i : i + chuck_size] for i in range(0, len(text), chuck_size)]
+
 
 async def voice_message_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -284,12 +345,16 @@ async def voice_message_handle(update: Update, context: CallbackContext):
         # check balance
         estimated_cost = 0
         if duration > config.WHISPER_FREE_QUOTA:
-            estimated_cost = (duration - config.WHISPER_FREE_QUOTA) * config.WHISPER_TOKENS
+            estimated_cost = (
+                duration - config.WHISPER_FREE_QUOTA
+            ) * config.WHISPER_TOKENS
 
         if not await check_balance(update, estimated_cost, user):
             return
-        
-        placeholder = await update.effective_message.reply_text("🎙 " + _("Decoding voice message ..."))
+
+        placeholder = await update.effective_message.reply_text(
+            "🎙 " + _("Decoding voice message ...")
+        )
 
         file_id = voice.file_id
         type = voice.mime_type.split("/")[1]
@@ -297,11 +362,11 @@ async def voice_message_handle(update: Update, context: CallbackContext):
         src_filename = os.path.join(config.AUDIO_FILE_TMP_DIR, file_id)
         filename = src_filename
         await new_file.download_to_drive(src_filename)
-        if type not in ['m4a', 'mp3', 'webm', 'mp4', 'mpga', 'wav', 'mpeg']:
+        if type not in ["m4a", "mp3", "webm", "mp4", "mpga", "wav", "mpeg"]:
             # convert to wav if source format is not supported by OpenAI
             wav_filename = src_filename + ".wav"
             seg = AudioSegment.from_file(src_filename, type)
-            seg.export(wav_filename, format='wav')
+            seg.export(wav_filename, format="wav")
             filename = wav_filename
 
         file_size = os.path.getsize(filename)
@@ -318,9 +383,10 @@ async def voice_message_handle(update: Update, context: CallbackContext):
         os.remove(filename)
         if os.path.exists(src_filename):
             os.remove(src_filename)
-        
+
     except Exception as e:
         await send_openai_error(update, context, e, placeholder=placeholder)
+
 
 def _build_youtube_prompt(url, _):
     video_id = helper.parse_youtube_id(url)
@@ -353,15 +419,25 @@ def _build_youtube_prompt(url, _):
         print(e)
     return None
 
-async def message_handle(update: Update, context: CallbackContext, message=None, use_new_dialog_timeout=True, chat_mode_id=None, placeholder: Message=None, cached_msg_id=None, upscale=False):
+
+async def message_handle(
+    update: Update,
+    context: CallbackContext,
+    message=None,
+    use_new_dialog_timeout=True,
+    chat_mode_id=None,
+    placeholder: Message = None,
+    cached_msg_id=None,
+    upscale=False,
+):
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
-    
+
     # check if message is edited
     if update.edited_message is not None:
         await edited_message_handle(update, context)
         return
-        
+
     _ = get_text_func(user, chat_id)
 
     user_id = user.id
@@ -389,9 +465,9 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
             if not cached_message.startswith("/"):
                 cached_message = "/{} {}".format(chat_mode_id, cached_message)
             cached_msg_id = db.cache_chat_message(cached_message)
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(_("Retry"), callback_data=f"retry|{cached_msg_id}")]
-        ])
+        reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(_("Retry"), callback_data=f"retry|{cached_msg_id}")]]
+        )
     elif use_new_dialog_timeout:
         # determine if the chat is timed out
         last_chat_time = db.get_last_chat_time(chat_id)
@@ -399,7 +475,9 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         if last_chat_time is None:
             # first launch or the current chat mode is outdated
             await set_chat_mode(update, context, chat_mode_id, reason="timeout")
-        elif timeout > 0 and (datetime.now() - last_chat_time).total_seconds() > timeout:
+        elif (
+            timeout > 0 and (datetime.now() - last_chat_time).total_seconds() > timeout
+        ):
             # timeout
             await set_chat_mode(update, context, chat_mode_id, reason="timeout")
             # drop placeholder to prevent the answer from showing before the timeout message
@@ -407,7 +485,10 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
 
     # flood control, must run after set_chat_mode
     rate_limit_start, rate_count = db.get_chat_rate_limit(chat_id)
-    if rate_limit_start is None or  (datetime.now() - rate_limit_start).total_seconds() > 60:
+    if (
+        rate_limit_start is None
+        or (datetime.now() - rate_limit_start).total_seconds() > 60
+    ):
         db.reset_chat_rate_limit(chat_id)
     else:
         db.inc_chat_rate_count(chat_id)
@@ -416,7 +497,12 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     # telegram flood control limit is 20 messages per minute, we set 12 to leave some budget
     if rate_count >= rate_limit:
         if rate_count < rate_limit + 3:
-            await update.effective_message.reply_text(_("⚠️ This chat has exceeded the rate limit. Please wait for up to 60 seconds."), parse_mode=ParseMode.HTML)
+            await update.effective_message.reply_text(
+                _(
+                    "⚠️ This chat has exceeded the rate limit. Please wait for up to 60 seconds."
+                ),
+                parse_mode=ParseMode.HTML,
+            )
         return
 
     db.set_user_attribute(user_id, "last_interaction", datetime.now())
@@ -436,7 +522,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     elif model_id == "gemini":
         model = gemini_utils.MODEL_GEMINI_VISION
     else:
-        model = openai_utils.MODEL_GPT_35_TURBO 
+        model = openai_utils.MODEL_GPT_35_TURBO
 
     # load chat history to context
     messages = db.get_chat_history(chat_id) if not disable_history else []
@@ -447,7 +533,9 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         # load long text to the context if any
         context_content, context_src = db.get_chat_context(chat_id)
         if context_content is not None:
-            system_prompt = "You are an assistant to answer the questions about the content of {}.\n\ncontent:\n{}".format(context_src, context_content)
+            system_prompt = "You are an assistant to answer the questions about the content of {}.\n\ncontent:\n{}".format(
+                context_src, context_content
+            )
             upscale = True
 
     message = message.strip()
@@ -458,17 +546,27 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         if helper.is_youtube_url(url):
             message = _build_youtube_prompt(url, _)
             if message is None:
-                await update.effective_message.reply_text(_("⚠️ Transcripts for this video are not available, possibly due to access restrictions or transcript disablement."), parse_mode=ParseMode.HTML)
+                await update.effective_message.reply_text(
+                    _(
+                        "⚠️ Transcripts for this video are not available, possibly due to access restrictions or transcript disablement."
+                    ),
+                    parse_mode=ParseMode.HTML,
+                )
                 return
         else:
             downloaded = trafilatura.fetch_url(url)
             message = trafilatura.extract(downloaded, include_comments=False)
             if message is None:
-                await update.effective_message.reply_text(_("⚠️ Failed to fetch the website content, possibly due to access restrictions."), parse_mode=ParseMode.HTML)
+                await update.effective_message.reply_text(
+                    _(
+                        "⚠️ Failed to fetch the website content, possibly due to access restrictions."
+                    ),
+                    parse_mode=ParseMode.HTML,
+                )
                 return
         upscale = True
 
-    voice_placeholder = None    
+    voice_placeholder = None
     answer = None
     sent_answer = None
     num_completion_tokens = None
@@ -492,33 +590,61 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         # enable token saving mode for low balance users and external modes
         max_affordable_tokens = min(max_affordable_tokens, 2000)
 
-    prompt, num_prompt_tokens, n_first_dialog_messages_removed, updated_history = chatgpt.build_prompt(system_prompt, messages, message, model, max_affordable_tokens)
+    prompt, num_prompt_tokens, n_first_dialog_messages_removed, updated_history = (
+        chatgpt.build_prompt(
+            system_prompt, messages, message, model, max_affordable_tokens
+        )
+    )
     if num_prompt_tokens > chatgpt.max_context_tokens(model):
-        await update.effective_message.reply_text(_("⚠️ Sorry, the message is too long for {}. Please reduce the length of the input data.").format(model))
+        await update.effective_message.reply_text(
+            _(
+                "⚠️ Sorry, the message is too long for {}. Please reduce the length of the input data."
+            ).format(model)
+        )
         return
-    elif is_url and chatgpt.max_output_tokens(model, num_context_tokens=num_prompt_tokens) < 1000:
-        await update.effective_message.reply_text(_("⚠️ Sorry, the content from the link is too long for {}. Please try another link.").format(model))
+    elif (
+        is_url
+        and chatgpt.max_output_tokens(model, num_context_tokens=num_prompt_tokens)
+        < 1000
+    ):
+        await update.effective_message.reply_text(
+            _(
+                "⚠️ Sorry, the content from the link is too long for {}. Please try another link."
+            ).format(model)
+        )
         return
     estimated_cost = int(num_prompt_tokens * prompt_cost_factor)
     if not await check_balance(update, estimated_cost, user):
         return
-    
+
     if is_url:
         db.set_chat_context(chat_id, message, url)
         text = _("Now you can ask me about the content in the link:")
         text += "\n" + url
         text += "\n\n"
-        text += ui.build_tips([
-            _("The cost of the next answers will be more than {} tokens").format(i18n.currency(estimated_cost)),
-            _("To reduce costs, you can use the /reset command to remove the data from the context"),
-        ], _, title=_("Notice"))
-        reply_markup = InlineKeyboardMarkup([
+        text += ui.build_tips(
             [
-                InlineKeyboardButton(_("Summarize"), callback_data="summarize"),
-                InlineKeyboardButton(_("Cancel"), callback_data="reset"),
+                _("The cost of the next answers will be more than {} tokens").format(
+                    i18n.currency(estimated_cost)
+                ),
+                _(
+                    "To reduce costs, you can use the /reset command to remove the data from the context"
+                ),
+            ],
+            _,
+            title=_("Notice"),
+        )
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(_("Summarize"), callback_data="summarize"),
+                    InlineKeyboardButton(_("Cancel"), callback_data="reset"),
+                ]
             ]
-        ])
-        await update.effective_message.reply_text(text, reply_markup=reply_markup, disable_web_page_preview=True)
+        )
+        await update.effective_message.reply_text(
+            text, reply_markup=reply_markup, disable_web_page_preview=True
+        )
         return
     # send warning if some messages were removed from the context
     if n_first_dialog_messages_removed > 0:
@@ -537,12 +663,19 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
 
         photo_filename = None
         # when replying to a photo
-        if update.effective_message.reply_to_message and update.effective_message.reply_to_message.photo:
-            photo = helper.get_original_photo(update.effective_message.reply_to_message.photo)
+        if (
+            update.effective_message.reply_to_message
+            and update.effective_message.reply_to_message.photo
+        ):
+            photo = helper.get_original_photo(
+                update.effective_message.reply_to_message.photo
+            )
             photo_file = await context.bot.get_file(photo.file_id)
-            path = pathlib.Path(f'tmp/images/{photo_file.file_unique_id}')
+            path = pathlib.Path(f"tmp/images/{photo_file.file_unique_id}")
             if not path.exists():
-                path = await photo_file.download_to_drive(f'tmp/images/{photo_file.file_unique_id}')
+                path = await photo_file.download_to_drive(
+                    f"tmp/images/{photo_file.file_unique_id}"
+                )
             photo_filename = path.resolve()
             num_processed_image += 1
 
@@ -557,7 +690,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         )
 
         prev_answer = ""
-        
+
         if api_type == "azure":
             stream_len = 150 if chat.type == Chat.PRIVATE else 200
         else:
@@ -565,7 +698,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
 
         if placeholder is None:
             placeholder = await update.effective_message.reply_text("...")
-        
+
         async for buffer in stream:
             finished, answer, num_completion_tokens = buffer
 
@@ -593,18 +726,33 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
                 message_chunk = answer[start_index:end_index]
                 if not finished:
                     message_chunk += " ..."
-                if current_message_chunk_index < n_message_chunks - 1 or placeholder is None:
+                if (
+                    current_message_chunk_index < n_message_chunks - 1
+                    or placeholder is None
+                ):
                     # send a new message chunk
-                    placeholder = await update.effective_message.reply_text(message_chunk, parse_mode=parse_mode, reply_markup=final_reply_markup)
+                    placeholder = await update.effective_message.reply_text(
+                        message_chunk,
+                        parse_mode=parse_mode,
+                        reply_markup=final_reply_markup,
+                    )
                 elif placeholder is not None:
                     # update last message chunk
                     try:
-                        await placeholder.edit_text(message_chunk, parse_mode=parse_mode, reply_markup=final_reply_markup)
+                        await placeholder.edit_text(
+                            message_chunk,
+                            parse_mode=parse_mode,
+                            reply_markup=final_reply_markup,
+                        )
                     except telegram.error.BadRequest as e:
                         if str(e).startswith("Message is not modified"):
                             continue
                         # May encounter parsing errors, send plaintext instead
-                        await placeholder.edit_text(message_chunk, parse_mode=None, reply_markup=final_reply_markup)
+                        await placeholder.edit_text(
+                            message_chunk,
+                            parse_mode=None,
+                            reply_markup=final_reply_markup,
+                        )
                         print("Telegram errors while editing text: {}".format(e))
                 sent_answer = answer[0:end_index]
                 current_message_chunk_index = chuck_index
@@ -612,27 +760,39 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
 
         # send warning if the anwser is too long (based on telegram's limit)
         if len(answer) > config.MESSAGE_MAX_LENGTH:
-            await update.effective_message.reply_text(_("⚠️ The answer was too long, has been splitted into multiple unformatted messages"))
+            await update.effective_message.reply_text(
+                _(
+                    "⚠️ The answer was too long, has been splitted into multiple unformatted messages"
+                )
+            )
     except telegram.error.BadRequest as e:
         error_text = f"Errors from Telegram: {e}"
-        logger.error(error_text)    
+        logger.error(error_text)
         if answer and n_sent_chunks < n_message_chunks:
             # send remaining answer chunks
             chunks = get_message_chunks(answer)
             for i in range(current_message_chunk_index + 1, n_message_chunks):
                 chunk = chunks[i]
                 # answer may have invalid characters, so we send it without parse_mode
-                await update.effective_message.reply_text(chunk, reply_markup=final_reply_markup)
+                await update.effective_message.reply_text(
+                    chunk, reply_markup=final_reply_markup
+                )
             sent_answer = answer
     except Exception as e:
         await send_openai_error(update, context, e)
-    
+
     # TODO: consume tokens even if an exception occurs
     # consume tokens and append the message record to db
     if sent_answer is not None and num_completion_tokens is not None:
         if not disable_history:
             # update user data
-            new_dialog_message = {"user": message, "bot": sent_answer, "date": datetime.now(), "num_context_tokens": num_prompt_tokens, "num_completion_tokens": num_completion_tokens}
+            new_dialog_message = {
+                "user": message,
+                "bot": sent_answer,
+                "date": datetime.now(),
+                "num_context_tokens": num_prompt_tokens,
+                "num_completion_tokens": num_completion_tokens,
+            }
             db.push_chat_history(
                 chat_id,
                 new_dialog_message,
@@ -641,20 +801,27 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
         else:
             db.update_chat_last_interaction(chat_id)
         final_cost = int(
-            num_prompt_tokens * prompt_cost_factor + 
-            num_completion_tokens * completion_cost_factor +
-            num_processed_image * image_cost_factor
+            num_prompt_tokens * prompt_cost_factor
+            + num_completion_tokens * completion_cost_factor
+            + num_processed_image * image_cost_factor
         )
         # IMPORTANT: consume tokens in the end of function call to protect users' credits
         db.inc_user_used_tokens(user_id, final_cost)
 
-        if voice_mode != "text":
-            await send_voice_message(update, context, sent_answer, chat_mode_id, placeholder=voice_placeholder)
+        # if voice_mode != "text":
+        #     await send_voice_message(update, context, sent_answer, chat_mode_id, placeholder=voice_placeholder)
 
-async def send_voice_message(update: Update, context: CallbackContext, message: str, chat_mode: str, placeholder = None):
+
+async def send_voice_message(
+    update: Update,
+    context: CallbackContext,
+    message: str,
+    chat_mode: str,
+    placeholder=None,
+):
     if chat_mode not in config.TTS_MODELS:
         return
-    
+
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
     _ = get_text_func(user, chat_id)
@@ -666,17 +833,24 @@ async def send_voice_message(update: Update, context: CallbackContext, message: 
         message = message[:limit]
 
     # estimate token amount
-    estimated_cost = config.TTS_ESTIMATED_DURATION_BASE * len(message) * config.COQUI_TOKENS
+    estimated_cost = (
+        config.TTS_ESTIMATED_DURATION_BASE * len(message) * config.COQUI_TOKENS
+    )
     print(f"[TTS] estimated used tokens: {estimated_cost}")
     if not await check_balance(update, estimated_cost, user):
         return
 
     if placeholder is None:
-        placeholder = await update.effective_message.reply_text("🗣 " + _("Recording ..."))
+        placeholder = await update.effective_message.reply_text(
+            "🗣 " + _("Recording ...")
+        )
 
     try:
         tts_model = config.TTS_MODELS[chat_mode]
-        filename = os.path.join(config.AUDIO_FILE_TMP_DIR, "{}-{}-{}.wav".format(chat_id, user.id, datetime.now()))
+        filename = os.path.join(
+            config.AUDIO_FILE_TMP_DIR,
+            "{}-{}-{}.wav".format(chat_id, user.id, datetime.now()),
+        )
         output = await tts_helper.tts(message, output=filename, model=tts_model)
         if output:
             seg = AudioSegment.from_wav(output)
@@ -684,17 +858,30 @@ async def send_voice_message(update: Update, context: CallbackContext, message: 
             estimated_cost = int(seg.duration_seconds * config.COQUI_TOKENS)
             ogg_filename = os.path.splitext(output)[0] + ".ogg"
             # must use OPUS codec to show spectrogram on Telegram
-            seg.export(ogg_filename, format='ogg', codec="libopus")
+            seg.export(ogg_filename, format="ogg", codec="libopus")
             try:
                 # in case the user deletes the placeholders manually
                 if placeholder is not None:
                     await placeholder.delete()
             except Exception as e:
                 print(e)
-            
+
             cached_msg_id = db.cache_chat_message(full_message)
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(_("Text"), callback_data=ui.add_arg("show_message", "id", cached_msg_id))]])
-            await update.effective_message.reply_voice(ogg_filename, reply_markup=reply_markup)
+            reply_markup = InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            _("Text"),
+                            callback_data=ui.add_arg(
+                                "show_message", "id", cached_msg_id
+                            ),
+                        )
+                    ]
+                ]
+            )
+            await update.effective_message.reply_voice(
+                ogg_filename, reply_markup=reply_markup
+            )
             db.inc_user_used_tokens(user.id, estimated_cost)
             print(f"[TTS] real used tokens: {estimated_cost}")
             # clean up
@@ -703,7 +890,9 @@ async def send_voice_message(update: Update, context: CallbackContext, message: 
             if os.path.exists(ogg_filename):
                 os.remove(ogg_filename)
         else:
-            text = "⚠️ " + _("The voice message could not be created. Voice messages are only valid in English.")
+            text = "⚠️ " + _(
+                "The voice message could not be created. Voice messages are only valid in English."
+            )
             try:
                 # in case the user deletes the placeholders manually
                 if placeholder is not None:
@@ -717,6 +906,7 @@ async def send_voice_message(update: Update, context: CallbackContext, message: 
         text += " " + _("Reason: {}").format(e)
         await update.effective_message.reply_text(text)
 
+
 async def summarize_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
@@ -726,17 +916,22 @@ async def summarize_handle(update: Update, context: CallbackContext):
     if helper.is_uri(context_src):
         url = context_src
         if helper.is_youtube_url(context_src):
-            prompt_pattern = _("summarize the transcript from {} containing abstract, list of key points and the conclusion\n\ntranscript:\n{}")
+            prompt_pattern = _(
+                "summarize the transcript from {} containing abstract, list of key points and the conclusion\n\ntranscript:\n{}"
+            )
         else:
-            prompt_pattern = _("summarize the content from {} containing abstract, list of key points and the conclusion\n\noriginal content:\n{}")
+            prompt_pattern = _(
+                "summarize the content from {} containing abstract, list of key points and the conclusion\n\noriginal content:\n{}"
+            )
         message = prompt_pattern.format(url, context_content)
         await message_handle(update, context, message, upscale=True)
+
 
 async def image_message_handle(update: Update, context: CallbackContext):
     if update.edited_message is not None:
         await edited_message_handle(update, context)
         return
-    
+
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
     _ = get_text_func(user, chat_id)
@@ -764,30 +959,43 @@ async def image_message_handle(update: Update, context: CallbackContext):
         if not message:
             text = _("💡 Please type /image and followed by the image prompt")
             text += "\n\n"
-            text += ui.build_tips([
-                _("<b>Example:</b>") + " /image a man wears spacesuit",
-                _("Some AI Models only support English prompt"),
-            ], _)
-
-            reply_markup = InlineKeyboardMarkup([
+            text += ui.build_tips(
                 [
-                    InlineKeyboardButton("💡 " + _("Learn"), url="https://t.me/nexia_news"),
+                    _("<b>Example:</b>") + " /image a man wears spacesuit",
+                    _("Some AI Models only support English prompt"),
                 ],
-            ])
-            await update.effective_message.reply_text(text, ParseMode.HTML, reply_markup=reply_markup)
+                _,
+            )
+
+            reply_markup = InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            "💡 " + _("Learn"), url="https://t.me/nexia_news"
+                        ),
+                    ],
+                ]
+            )
+            await update.effective_message.reply_text(
+                text, ParseMode.HTML, reply_markup=reply_markup
+            )
             return
         result = await openai_utils.moderation(message)
         if not result:
-            await update.effective_message.reply_text("⚠️ " + _("Inappropriate prompt. Please modify your prompt and retry."), ParseMode.HTML)
+            await update.effective_message.reply_text(
+                "⚠️ " + _("Inappropriate prompt. Please modify your prompt and retry."),
+                ParseMode.HTML,
+            )
             return
         path = "image"
-    
+
     if cached_msg_id is None:
         cached_msg_id = db.cache_chat_message(message)
 
     path = ui.add_arg(path, "id", cached_msg_id)
     text, reply_markup = ui.image_menu(_, path=path)
     await reply_or_edit_text(update, text, reply_markup=reply_markup)
+
 
 async def gen_image_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -808,7 +1016,7 @@ async def gen_image_handle(update: Update, context: CallbackContext):
         if not prompt:
             await reply_or_edit_text(update, "⚠️ " + _("Outdated command"))
             return
-        
+
     estimated_cost = gen_image_utils.calc_cost(model, width, height)
     print(f"estimated cost: {estimated_cost}")
     if not estimated_cost:
@@ -817,12 +1025,17 @@ async def gen_image_handle(update: Update, context: CallbackContext):
 
     if not await check_balance(update, estimated_cost, user):
         return
-    
+
     remaing_time = db.is_user_generating_image(user_id)
     if remaing_time:
-        await update.effective_message.reply_text(_("⚠️ It is only possible to generate one image at a time. Please wait for {} seconds to retry.").format(int(remaing_time)), parse_mode=ParseMode.HTML)
+        await update.effective_message.reply_text(
+            _(
+                "⚠️ It is only possible to generate one image at a time. Please wait for {} seconds to retry."
+            ).format(int(remaing_time)),
+            parse_mode=ParseMode.HTML,
+        )
         return
-    
+
     placeholder = None
     try:
         db.mark_user_is_generating_image(user_id, True)
@@ -832,7 +1045,9 @@ async def gen_image_handle(update: Update, context: CallbackContext):
         else:
             placeholder = await query.edit_message_text(text)
 
-        result = await gen_image_utils.inference(model=model, width=width, height=height, prompt=prompt)
+        result = await gen_image_utils.inference(
+            model=model, width=width, height=height, prompt=prompt
+        )
         try:
             # in case the user deletes the placeholders manually
             await placeholder.delete()
@@ -840,7 +1055,7 @@ async def gen_image_handle(update: Update, context: CallbackContext):
         except Exception as e:
             print("failed to delete placeholder")
             print(e)
-        
+
         # send as a media group
         # media_group = map(lambda image_url: InputMediaPhoto(image_url), images)
         # media_group = list(media_group)
@@ -852,7 +1067,10 @@ async def gen_image_handle(update: Update, context: CallbackContext):
             image = image_data["image"]
             seed = image_data["seed"] if "seed" in image_data else None
             buttons = [
-                InlineKeyboardButton(_("Prompt"), callback_data=ui.add_arg("show_message", "id", cached_msg_id)),
+                InlineKeyboardButton(
+                    _("Prompt"),
+                    callback_data=ui.add_arg("show_message", "id", cached_msg_id),
+                ),
                 InlineKeyboardButton(_("Retry"), callback_data=query.data),
             ]
             if seed is not None:
@@ -865,10 +1083,10 @@ async def gen_image_handle(update: Update, context: CallbackContext):
                 }
                 cached_msg_id = db.cache_chat_message(json.dumps(upscale_data))
                 callback_data = ui.add_arg("upscale", "id", cached_msg_id)
-                buttons.append(InlineKeyboardButton(_("Upscale"), callback_data=callback_data))
-            reply_markup = InlineKeyboardMarkup([
-                buttons
-            ])
+                buttons.append(
+                    InlineKeyboardButton(_("Upscale"), callback_data=callback_data)
+                )
+            reply_markup = InlineKeyboardMarkup([buttons])
             # image can be a url string and bytes
             await context.bot.send_photo(chat_id, image, reply_markup=reply_markup)
         db.inc_user_used_tokens(user_id, estimated_cost)
@@ -876,9 +1094,12 @@ async def gen_image_handle(update: Update, context: CallbackContext):
     except Exception as e:
         db.mark_user_is_generating_image(user_id, False)
         error_message = _("Server error. Please try again later.")
-        await send_error(update, context, message=error_message, placeholder=placeholder)
+        await send_error(
+            update, context, message=error_message, placeholder=placeholder
+        )
         raise e
-    
+
+
 async def upscale_image_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
@@ -895,32 +1116,50 @@ async def upscale_image_handle(update: Update, context: CallbackContext):
         if not cached_data:
             await reply_or_edit_text(update, "⚠️ " + _("Outdated command"))
             return
-        
+
     estimated_cost = config.UPSCALE_COST
     if not await check_balance(update, estimated_cost, user):
         return
-        
+
     consent = ui.get_arg(path, "consent")
     if not consent:
         text = "ℹ️ " + _("Upscaling images with real-esrgan-4x can be expensive.")
         callback_data = ui.add_args("upscale", {"id": cached_msg_id, "consent": "ok"})
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(_("Upscale - {} tokens").format(config.UPSCALE_COST), callback_data=callback_data),]
-        ])
-        await update.effective_message.reply_text(text, reply_markup=reply_markup, reply_to_message_id=update.effective_message.message_id)
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        _("Upscale - {} tokens").format(config.UPSCALE_COST),
+                        callback_data=callback_data,
+                    ),
+                ]
+            ]
+        )
+        await update.effective_message.reply_text(
+            text,
+            reply_markup=reply_markup,
+            reply_to_message_id=update.effective_message.message_id,
+        )
         return
-        
+
     try:
         remaing_time = db.is_user_generating_image(user_id)
         if remaing_time:
-            await update.effective_message.reply_text(_("⚠️ It is only possible to generate one image at a time. Please wait for {} seconds to retry.").format(int(remaing_time)), parse_mode=ParseMode.HTML)
+            await update.effective_message.reply_text(
+                _(
+                    "⚠️ It is only possible to generate one image at a time. Please wait for {} seconds to retry."
+                ).format(int(remaing_time)),
+                parse_mode=ParseMode.HTML,
+            )
             return
-        
+
         db.mark_user_is_generating_image(user_id, True)
         args = json.loads(cached_data)
         text = _("👨‍🎨 painting ...")
         placeholder = await query.edit_message_text(text)
-        photo = helper.get_original_photo(update.effective_message.reply_to_message.photo)
+        photo = helper.get_original_photo(
+            update.effective_message.reply_to_message.photo
+        )
         photo_file = await context.bot.get_file(photo.file_id)
         buffer = await photo_file.download_as_bytearray()
         image = await gen_image_utils.upscale(buffer)
@@ -931,7 +1170,7 @@ async def upscale_image_handle(update: Update, context: CallbackContext):
         except Exception as e:
             print("failed to delete placeholder")
             print(e)
-        
+
         # # image can be a url string and bytes
         await context.bot.send_photo(chat_id, image)
         db.inc_user_used_tokens(user_id, estimated_cost)
@@ -939,8 +1178,11 @@ async def upscale_image_handle(update: Update, context: CallbackContext):
     except Exception as e:
         db.mark_user_is_generating_image(user_id, False)
         error_message = _("Server error. Please try again later.")
-        await send_error(update, context, message=error_message, placeholder=placeholder)
+        await send_error(
+            update, context, message=error_message, placeholder=placeholder
+        )
         raise e
+
 
 async def show_message_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -962,10 +1204,14 @@ async def show_message_handle(update: Update, context: CallbackContext):
             inline_keyboard.append(buttons)
     reply_markup = InlineKeyboardMarkup(inline_keyboard)
 
-    await update.effective_message.edit_caption(caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+    await update.effective_message.edit_caption(
+        caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup
+    )
+
 
 async def reset_handle(update: Update, context: CallbackContext):
     await set_chat_mode(update, context, reason="reset")
+
 
 async def show_chat_modes_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -975,9 +1221,12 @@ async def show_chat_modes_handle(update: Update, context: CallbackContext):
     _ = get_text_func(user, chat_id)
 
     text, reply_markup = ui.settings(db, chat_id, _, "settings>current_chat_mode")
-    await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+    await update.message.reply_text(
+        text, parse_mode=ParseMode.HTML, reply_markup=reply_markup
+    )
 
-async def set_chat_model(update: Update, context: CallbackContext, model = None):
+
+async def set_chat_model(update: Update, context: CallbackContext, model=None):
     user = await register_user_if_not_exists(update, context)
     chat = update.effective_chat
     chat_id = update.effective_chat.id
@@ -988,7 +1237,9 @@ async def set_chat_model(update: Update, context: CallbackContext, model = None)
 
     db.set_current_model(chat_id, model)
 
-    text = _("ℹ️ You are using {} model ...").format(config.DEFAULT_MODELS[model]["name"])
+    text = _("ℹ️ You are using {} model ...").format(
+        config.DEFAULT_MODELS[model]["name"]
+    )
 
     if model == "gpt4":
         text += "\n\n"
@@ -998,15 +1249,27 @@ async def set_chat_model(update: Update, context: CallbackContext, model = None)
     keyborad_rows = None
     if chat.type == Chat.PRIVATE:
         keyborad_rows = [
-            [InlineKeyboardButton("💬 " + _("Change AI model"), web_app=WebAppInfo(os.path.join(config.WEB_APP_URL, "models?start_for_result=1")))]
+            [
+                InlineKeyboardButton(
+                    "💬 " + _("Change AI model"),
+                    web_app=WebAppInfo(
+                        os.path.join(config.WEB_APP_URL, "models?start_for_result=1")
+                    ),
+                )
+            ]
         ]
 
     if keyborad_rows:
         reply_markup = InlineKeyboardMarkup(keyborad_rows)
 
-    await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+    await update.message.reply_text(
+        text, parse_mode=ParseMode.HTML, reply_markup=reply_markup
+    )
 
-async def set_chat_mode(update: Update, context: CallbackContext, chat_mode_id = None, reason: str = None):
+
+async def set_chat_mode(
+    update: Update, context: CallbackContext, chat_mode_id=None, reason: str = None
+):
     user = await register_user_if_not_exists(update, context)
     chat = update.effective_chat
     chat_id = update.effective_chat.id
@@ -1040,13 +1303,22 @@ async def set_chat_mode(update: Update, context: CallbackContext, chat_mode_id =
     keyborad_rows = []
     if chat.type == Chat.PRIVATE:
         keyborad_rows = [
-            [InlineKeyboardButton("💬 " + _("Change chat mode"), web_app=WebAppInfo(os.path.join(config.WEB_APP_URL, "roles?start_for_result=1")))]
+            [
+                InlineKeyboardButton(
+                    "💬 " + _("Change chat mode"),
+                    web_app=WebAppInfo(
+                        os.path.join(config.WEB_APP_URL, "roles?start_for_result=1")
+                    ),
+                )
+            ]
         ]
     icon = chat_mode["icon"] if "icon" in chat_mode else "ℹ️"
     icon_prefix = icon + " "
 
     if reason == "reset":
-        text = icon_prefix + _("I have already forgotten what we previously talked about.")
+        text = icon_prefix + _(
+            "I have already forgotten what we previously talked about."
+        )
         keyborad_rows = []
     elif show_tips and "greeting" in chat_mode:
         text = icon_prefix + _(chat_mode["greeting"])
@@ -1058,7 +1330,9 @@ async def set_chat_mode(update: Update, context: CallbackContext, chat_mode_id =
         if model_id not in config.DEFAULT_MODELS:
             model_id = config.DEFAULT_MODEL
         model = config.DEFAULT_MODELS[model_id]
-        text = icon_prefix + _("You're now chatting with {} ({}) ...").format(chat_mode["name"], model["name"])
+        text = icon_prefix + _("You're now chatting with {} ({}) ...").format(
+            chat_mode["name"], model["name"]
+        )
 
     if show_tips:
         tips = ui.chat_mode_tips(chat_mode_id, _)
@@ -1068,11 +1342,20 @@ async def set_chat_mode(update: Update, context: CallbackContext, chat_mode_id =
         chat = update.effective_chat
         if chat.type != Chat.PRIVATE:
             text += "\n\n"
-            text += ui.build_tips([
-                _("To continue the conversation in the group chat, please \"reply\" to my messages."),
-                _("Please \"SLOW DOWN\" interactions with the chatbot as group chats can easily exceed the Telegram rate limit. "),
-                _("Once this chat exceeds the rate limit, the chatbot won't respond temporarily."),
-            ], _)
+            text += ui.build_tips(
+                [
+                    _(
+                        'To continue the conversation in the group chat, please "reply" to my messages.'
+                    ),
+                    _(
+                        'Please "SLOW DOWN" interactions with the chatbot as group chats can easily exceed the Telegram rate limit. '
+                    ),
+                    _(
+                        "Once this chat exceeds the rate limit, the chatbot won't respond temporarily."
+                    ),
+                ],
+                _,
+            )
 
     if not config.ENABLE_SELECT_MODEL:
         if reason == "start":
@@ -1088,12 +1371,14 @@ async def set_chat_mode(update: Update, context: CallbackContext, chat_mode_id =
     if send_empty_message:
         await message_handle(update, context, "")
 
+
 async def set_chat_mode_handle(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
 
     chat_mode = query.data.split("|")[1]
     await set_chat_mode(update, context, chat_mode)
+
 
 async def show_balance_handle(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -1105,7 +1390,9 @@ async def show_balance_handle(update: Update, context: CallbackContext):
     _ = get_text_func(user, chat_id)
     chat = update.effective_chat
     if chat.type != Chat.PRIVATE:
-        text = _("🔒 For privacy reason, your balance won't show in a group chat. Please use /balance command in @{}.").format(config.TELEGRAM_BOT_NAME)
+        text = _(
+            "🔒 For privacy reason, your balance won't show in a group chat. Please use /balance command in @{}."
+        ).format(config.TELEGRAM_BOT_NAME)
         await reply_or_edit_text(update, text)
         return
 
@@ -1122,7 +1409,8 @@ async def show_balance_handle(update: Update, context: CallbackContext):
         [
             _("The longer conversation would spend more tokens"),
             _("/reset to clear history manually"),
-        ], _
+        ],
+        _,
     )
     # text += f"You spent <b>{n_spent_dollars:.03f}$</b>\n"
     # text += f"You used <b>{used_tokens}</b> tokens <i>(price: ${config.TOKEN_PRICE} per 1000 tokens)</i>\n"
@@ -1149,17 +1437,34 @@ async def show_balance_handle(update: Update, context: CallbackContext):
         },
     ]
 
-    buttons = map(lambda pack: \
-                  InlineKeyboardButton("+{:,} tokens - ${:,.2f}{}".format(pack["tokens_amount"], pack["payment_amount"], " ({})".format(pack["caption"]) if "caption" in pack else ""), \
-                    callback_data="top_up|{}|{}".format(pack["payment_amount"], pack["tokens_amount"])), \
-                        tokens_packs)
+    buttons = map(
+        lambda pack: InlineKeyboardButton(
+            "+{:,} tokens - ${:,.2f}{}".format(
+                pack["tokens_amount"],
+                pack["payment_amount"],
+                " ({})".format(pack["caption"]) if "caption" in pack else "",
+            ),
+            callback_data="top_up|{}|{}".format(
+                pack["payment_amount"], pack["tokens_amount"]
+            ),
+        ),
+        tokens_packs,
+    )
     rows = map(lambda button: [button], buttons)
     reply_markup = InlineKeyboardMarkup(list(rows))
 
-    await reply_or_edit_text(update, text, parse_mode=ParseMode.HTML, reply_markup=reply_markup, disable_web_page_preview=True)
+    await reply_or_edit_text(
+        update,
+        text,
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup,
+        disable_web_page_preview=True,
+    )
+
 
 def price_to_tokens(price: float):
     return int(price / config.TOKEN_PRICE * 1000)
+
 
 async def show_payment_methods(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -1180,16 +1485,27 @@ async def show_payment_methods(update: Update, context: CallbackContext):
     text += _("💳 Debit or Credit Card - support 200+ countries/regions\n")
     text += "\n"
     text += _("💎 Crypto - BTC, USDT, USDC, TON, BNB\n")
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton(_("💳 Debit or Credit Card"), callback_data=f"payment|paypal|{amount}|{tokens_amount}")],
-        [InlineKeyboardButton(_("💎 Crypto"), callback_data=f"payment|crypto|{amount}|{tokens_amount}")]
-    ])
+    reply_markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    _("💳 Debit or Credit Card"),
+                    callback_data=f"payment|paypal|{amount}|{tokens_amount}",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    _("💎 Crypto"),
+                    callback_data=f"payment|crypto|{amount}|{tokens_amount}",
+                )
+            ],
+        ]
+    )
 
     await query.edit_message_text(
-        text,
-        parse_mode=ParseMode.HTML,
-        reply_markup=reply_markup
+        text, parse_mode=ParseMode.HTML, reply_markup=reply_markup
     )
+
 
 async def show_invoice(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -1223,29 +1539,40 @@ async def show_invoice(update: Update, context: CallbackContext):
 
         button_text = ""
         if method == "paypal":
-            tips.append(_("If you do not have a PayPal account, click on the button located below the login button to pay with cards directly."))
+            tips.append(
+                _(
+                    "If you do not have a PayPal account, click on the button located below the login button to pay with cards directly."
+                )
+            )
             button_text = _("💳 Pay with Debit or Credit Card")
         elif method == "crypto":
-            tips.append(_("If you have any issues related to crypto payment, please contact the customer service in the payment page, or send messages to {} directly for assistance.").format("@cryptomus_support"))
+            tips.append(
+                _(
+                    "If you have any issues related to crypto payment, please contact the customer service in the payment page, or send messages to {} directly for assistance."
+                ).format("@cryptomus_support")
+            )
             button_text = _("💎 Pay with Crypto")
 
         tips.append(_("Tokens will be credited within 10 minutes of payment."))
-        tips.append(_("Please contact @{} if tokens are not received after 1 hour of payment.").format(config.SUPPORT_USER_NAME))
+        tips.append(
+            _(
+                "Please contact @{} if tokens are not received after 1 hour of payment."
+            ).format(config.SUPPORT_USER_NAME)
+        )
 
         text += "\n\n".join(map(lambda s: "• " + s, tips))
 
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(button_text, url=result["url"])]
-        ])
+        reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(button_text, url=result["url"])]]
+        )
     else:
         text = _("⚠️ Failed to create an invoice, please try again later.")
         reply_markup = None
 
     await query.edit_message_text(
-        text,
-        parse_mode=ParseMode.HTML,
-        reply_markup=reply_markup
+        text, parse_mode=ParseMode.HTML, reply_markup=reply_markup
     )
+
 
 async def settings_handle(update: Update, context: CallbackContext, data: str = None):
     user = await register_user_if_not_exists(update, context)
@@ -1266,10 +1593,14 @@ async def settings_handle(update: Update, context: CallbackContext, data: str = 
     else:
         text, reply_markup = ui.settings(db, chat_id, _, data=data)
 
-    await reply_or_edit_text(update, text, reply_markup=reply_markup, disable_web_page_preview=True)
+    await reply_or_edit_text(
+        update, text, reply_markup=reply_markup, disable_web_page_preview=True
+    )
+
 
 async def close_handle(update: Update, context: CallbackContext):
     await update.effective_message.delete()
+
 
 async def show_earn_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -1279,21 +1610,28 @@ async def show_earn_handle(update: Update, context: CallbackContext):
     result = await api.earn(user.id)
 
     if result and result["status"] == "OK":
-        referral_url = result['referral_url']
+        referral_url = result["referral_url"]
 
         text = _("<b>💰 Earn</b>\n\n")
         # text += "\n\n"
-        text += _("Get %s%% rewards from the referred payments\n\n") % (result['commission_rate'] * 100)
-        text += _("Unused rewards: ${:,.2f}\n").format(result['unused_rewards'])
-        text += _("Total earned: ${:,.2f}\n\n").format(result['total_earned'])
+        text += _("Get %s%% rewards from the referred payments\n\n") % (
+            result["commission_rate"] * 100
+        )
+        text += _("Unused rewards: ${:,.2f}\n").format(result["unused_rewards"])
+        text += _("Total earned: ${:,.2f}\n\n").format(result["total_earned"])
         text += _("Referral link:\n")
         text += f'<a href="{referral_url}">{referral_url}</a>\n'
-        text += _("<i>You have referred {:,} new users</i>\n\n").format(result['referred_count'])
-        text += _("<i>💡 Refer the new users via your referral link, and you'll get a reward when they make a payment.</i>")
+        text += _("<i>You have referred {:,} new users</i>\n\n").format(
+            result["referred_count"]
+        )
+        text += _(
+            "<i>💡 Refer the new users via your referral link, and you'll get a reward when they make a payment.</i>"
+        )
     else:
         text = _("⚠️ Server error, please try again later.")
 
     await reply_or_edit_text(update, text)
+
 
 async def edited_message_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
@@ -1303,16 +1641,19 @@ async def edited_message_handle(update: Update, context: CallbackContext):
     text = _("💡 Edited messages won't take effects")
     await update.edited_message.reply_text(text, parse_mode=ParseMode.HTML)
 
+
 async def error_handle(update: Update, context: CallbackContext) -> None:
     # collect error message
-    tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+    tb_list = traceback.format_exception(
+        None, context.error, context.error.__traceback__
+    )
     callstacks = "".join(tb_list)
 
     if "Message is not modified" in callstacks:
-        # ignore telegram.error.BadRequest: Message is not modified. 
+        # ignore telegram.error.BadRequest: Message is not modified.
         # The issue is caused by users clicking inline keyboards repeatedly
         return
-    
+
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
 
     chunks = get_message_chunks(callstacks, chuck_size=2000)
@@ -1333,10 +1674,12 @@ async def error_handle(update: Update, context: CallbackContext) -> None:
     except Exception as e:
         print(f"Failed to send bugreport: {e}")
 
+
 async def app_post_init(application: Application):
     # setup bot commands
     await application.bot.set_my_commands(get_commands())
-    await application.bot.set_my_commands(get_commands('zh_CN'), language_code="zh")
+    await application.bot.set_my_commands(get_commands("zh_CN"), language_code="zh")
+
 
 def run_bot() -> None:
     application = (
@@ -1348,7 +1691,10 @@ def run_bot() -> None:
     )
 
     # add handlers
-    if not config.ALLOWED_TELEGRAM_USERNAMES or len(config.ALLOWED_TELEGRAM_USERNAMES) == 0:
+    if (
+        not config.ALLOWED_TELEGRAM_USERNAMES
+        or len(config.ALLOWED_TELEGRAM_USERNAMES) == 0
+    ):
         user_filter = filters.ALL
     else:
         user_filter = filters.User(username=config.ALLOWED_TELEGRAM_USERNAMES)
@@ -1357,32 +1703,76 @@ def run_bot() -> None:
     application.add_handler(CommandHandler("reset", reset_handle, filters=user_filter))
     application.add_handler(CallbackQueryHandler(reset_handle, pattern="^reset"))
     # application.add_handler(CommandHandler("role", show_chat_modes_handle, filters=user_filter))
-    application.add_handler(CallbackQueryHandler(set_chat_mode_handle, pattern="^set_chat_mode"))
-    application.add_handler(CommandHandler("balance", show_balance_handle, filters=user_filter))
-    application.add_handler(CallbackQueryHandler(show_balance_handle, pattern="^balance"))
-    application.add_handler(CallbackQueryHandler(show_payment_methods, pattern="^top_up\|(\d)+"))
+    application.add_handler(
+        CallbackQueryHandler(set_chat_mode_handle, pattern="^set_chat_mode")
+    )
+    application.add_handler(
+        CommandHandler("balance", show_balance_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CallbackQueryHandler(show_balance_handle, pattern="^balance")
+    )
+    application.add_handler(
+        CallbackQueryHandler(show_payment_methods, pattern="^top_up\|(\d)+")
+    )
     application.add_handler(CallbackQueryHandler(show_invoice, pattern="^payment\|"))
-    application.add_handler(CommandHandler("earn", show_earn_handle, filters=user_filter))
-    application.add_handler(CommandHandler("gpt", common_command_handle, filters=user_filter))
-    application.add_handler(CommandHandler("gpt4", common_command_handle, filters=user_filter))
-    application.add_handler(CommandHandler("gemini", common_command_handle, filters=user_filter))
-    application.add_handler(CommandHandler("chatgpt", common_command_handle, filters=user_filter))
-    application.add_handler(CommandHandler("proofreader", common_command_handle, filters=user_filter))
-    application.add_handler(CommandHandler("dictionary", common_command_handle, filters=user_filter))
-    application.add_handler(CallbackQueryHandler(common_command_handle, pattern="^retry"))
-    application.add_handler(CallbackQueryHandler(summarize_handle, pattern="^summarize"))
-    application.add_handler(CommandHandler("image", image_message_handle, filters=user_filter))
-    application.add_handler(CallbackQueryHandler(image_message_handle, pattern="^image"))
-    application.add_handler(CallbackQueryHandler(gen_image_handle, pattern="^gen_image"))
-    application.add_handler(CallbackQueryHandler(upscale_image_handle, pattern="^upscale"))
-    application.add_handler(CallbackQueryHandler(show_message_handle, pattern="^show_message"))
-    application.add_handler(CommandHandler("settings", settings_handle, filters=user_filter))
-    application.add_handler(CallbackQueryHandler(settings_handle, pattern="^(settings|about)"))
+    application.add_handler(
+        CommandHandler("earn", show_earn_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CommandHandler("gpt", common_command_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CommandHandler("gpt4", common_command_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CommandHandler("gemini", common_command_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CommandHandler("chatgpt", common_command_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CommandHandler("proofreader", common_command_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CommandHandler("dictionary", common_command_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CallbackQueryHandler(common_command_handle, pattern="^retry")
+    )
+    application.add_handler(
+        CallbackQueryHandler(summarize_handle, pattern="^summarize")
+    )
+    application.add_handler(
+        CommandHandler("image", image_message_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CallbackQueryHandler(image_message_handle, pattern="^image")
+    )
+    application.add_handler(
+        CallbackQueryHandler(gen_image_handle, pattern="^gen_image")
+    )
+    application.add_handler(
+        CallbackQueryHandler(upscale_image_handle, pattern="^upscale")
+    )
+    application.add_handler(
+        CallbackQueryHandler(show_message_handle, pattern="^show_message")
+    )
+    application.add_handler(
+        CommandHandler("settings", settings_handle, filters=user_filter)
+    )
+    application.add_handler(
+        CallbackQueryHandler(settings_handle, pattern="^(settings|about)")
+    )
     application.add_handler(CallbackQueryHandler(close_handle, pattern="^close"))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & user_filter, message_handle))
-    application.add_handler(MessageHandler(filters.VOICE & user_filter, voice_message_handle))
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND & user_filter, message_handle)
+    )
+    application.add_handler(
+        MessageHandler(filters.VOICE & user_filter, voice_message_handle)
+    )
     application.add_error_handler(error_handle)
-    
+
     # start the bot
     application.run_polling()
 
