@@ -1,16 +1,25 @@
 import tiktoken
 import openai
+from openai import AsyncOpenAI
 import config
 
-MODEL_GPT_35_TURBO = "gpt-3.5-turbo-1106"
+MODEL_GPT_35_TURBO = "gpt-3.5-turbo"
 MODEL_GPT_4 = "gpt-4"
 # MODEL_GPT_4_32K = "gpt-4-32k"
 
-SUPPORTED_MODELS = set([
-    MODEL_GPT_35_TURBO,
-    MODEL_GPT_4,
-    # MODEL_GPT_4_32K,
-])
+SUPPORTED_MODELS = set(
+    [
+        MODEL_GPT_35_TURBO,
+        MODEL_GPT_4,
+        # MODEL_GPT_4_32K,
+    ]
+)
+
+client = AsyncOpenAI(
+    # This is the default and can be omitted
+    api_key=config.OPENAI_API_KEY,
+)
+
 
 def print_gpt_models():
     # list models
@@ -19,17 +28,20 @@ def print_gpt_models():
         if model.id.startswith("gpt"):
             print(model.id)
 
+
 def num_tokens_from_string(string: str, model: str) -> int:
     """Returns the number of tokens in a text string."""
     encoding = tiktoken.encoding_for_model(model)
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
+
 def max_output_tokens(model: str, num_context_tokens: int = None):
     remaing = max_context_tokens(model) - num_context_tokens
     if model == MODEL_GPT_35_TURBO:
         return min(4096, remaing)
     return remaing
+
 
 def max_context_tokens(model):
     if model == MODEL_GPT_35_TURBO:
@@ -42,6 +54,7 @@ def max_context_tokens(model):
         raise NotImplementedError(
             f"""max_context_tokens() is not implemented for model {model}."""
         )
+
 
 # sample code from https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
@@ -58,11 +71,13 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
         "gpt-4-32k-0314",
         "gpt-4-0613",
         "gpt-4-32k-0613",
-        }:
+    }:
         tokens_per_message = 3
         tokens_per_name = 1
     elif model == "gpt-3.5-turbo-0301":
-        tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
+        tokens_per_message = (
+            4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
+        )
         tokens_per_name = -1  # if there's a name, the role is omitted
     elif "gpt-3.5-turbo" in model:
         # print("Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613.")
@@ -84,6 +99,7 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
 
+
 def chatgpt_prompt(system_prompt, chat_messages, new_message):
     messages = [
         {
@@ -95,91 +111,93 @@ def chatgpt_prompt(system_prompt, chat_messages, new_message):
     # add chat context
     if len(chat_messages) > 0:
         for message in chat_messages:
-            messages.append({
-                "role": "user",
-                "content": message['user'],
-            })
-            messages.append({
-                "role": "assistant",
-                "content": message['bot'],
-            })
+            messages.append(
+                {
+                    "role": "user",
+                    "content": message["user"],
+                }
+            )
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": message["bot"],
+                }
+            )
 
     # current message
-    messages.append({
-        "role": "user",
-        "content": new_message,
-    })
+    messages.append(
+        {
+            "role": "user",
+            "content": new_message,
+        }
+    )
 
     return messages
 
-def prompt_from_chat_messages(system_prompt, chat_messages, new_message, model="gpt-3.5-turbo"):
+
+def prompt_from_chat_messages(
+    system_prompt, chat_messages, new_message, model="gpt-3.5-turbo"
+):
     if model in SUPPORTED_MODELS:
         return chatgpt_prompt(system_prompt, chat_messages, new_message)
     else:
-        raise NotImplementedError(f"""prompt_from_chat_messages() is not implemented for model {model}.""")
-    
+        raise NotImplementedError(
+            f"""prompt_from_chat_messages() is not implemented for model {model}."""
+        )
+
+
 def _reply_content_stream(response, model):
     if model in SUPPORTED_MODELS:
         delta = response.choices[0].delta
-        return delta.content if "content" in delta else None, response.choices[0].finish_reason
+        return delta.content, response.choices[0].finish_reason
     else:
-        raise NotImplementedError(f"""reply_content() is not implemented for model {model}.""")
-    
+        raise NotImplementedError(
+            f"""reply_content() is not implemented for model {model}."""
+        )
+
+
 def reply_content(response, model, stream=False):
     if stream:
         return _reply_content_stream(response, model)
-    
+
     if model in SUPPORTED_MODELS:
         return response.choices[0].message.content
     else:
-        raise NotImplementedError(f"""reply_content() is not implemented for model {model}.""")
-    
-async def create_request(prompt, model, max_tokens=None, stream=False, api_type=None):
-    args = {}
-    if api_type == "azure":
-        args["engine"] = model
-        args["api_type"] = api_type
-        args["api_base"] = config.AZURE_OPENAI_API_BASE
-        args["api_version"] = config.AZURE_OPENAI_API_VERSION
-        args["api_key"] = config.AZURE_OPENAI_API_KEY
-    else:
-        args["model"] = model
-        args["api_type"] = config.DEFAULT_OPENAI_API_TYPE
-        args["api_key"] = config.OPENAI_API_KEY
+        raise NotImplementedError(
+            f"""reply_content() is not implemented for model {model}."""
+        )
 
-    return await openai.ChatCompletion.acreate(
+
+async def create_request(prompt, model, max_tokens=None, stream=False):
+    return await client.chat.completions.create(
+        model=model,
         messages=prompt,
-        # request_timeout=config.OPENAI_TIMEOUT,
         max_tokens=max_tokens,
         stream=stream,
-        **args,
     )
-    
+
+
 async def create_image(prompt, num_images: int = 1):
-    response = await openai.Image.acreate(
+    response = await client.images.generate(
         model="dall-e-3",
         prompt=prompt,
         size="1024x1024",
         quality="standard",
         n=num_images,
-        api_type=config.DEFAULT_OPENAI_API_TYPE,
-        api_key=config.OPENAI_API_KEY,
     )
-    return response['data']
+    return response.data
+
 
 async def audio_transcribe(filename):
-    audio_file= open(filename, "rb")
-    response = openai.Audio.transcribe(
-        "whisper-1", 
-        audio_file, 
-        api_type=config.DEFAULT_OPENAI_API_TYPE,
-        api_key=config.OPENAI_API_KEY,
-        )
-    return response['text']
+    audio_file = open(filename, "rb")
+    response = await client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_file,
+    )
+    return response.text
+
 
 async def moderation(prompt):
-    response = await openai.Moderation.acreate(
-        input=prompt
-    )
-    output = response["results"][0]
-    return not output["flagged"]
+    response = await client.moderations.create(input=prompt)
+    output = response.results[0]
+    return not output.flagged

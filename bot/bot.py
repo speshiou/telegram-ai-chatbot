@@ -376,7 +376,7 @@ async def voice_message_handle(update: Update, context: CallbackContext):
             if estimated_cost > 0:
                 print(f"voice used tokens: {estimated_cost}")
                 db.inc_user_used_tokens(user.id, estimated_cost)
-            await message_handle(update, context, text, placeholder=placeholder)
+            await message_handle(update, context, message=text, placeholder=placeholder)
         else:
             await placeholder.edit_text("⚠️ " + _("Voice data size exceeds 20MB limit"))
         # clean up
@@ -443,8 +443,6 @@ async def message_handle(
     user_id = user.id
     chat = update.effective_chat
     reply_markup = None
-
-    voice_mode = db.get_chat_voice_mode(chat_id)
 
     if chat_mode_id is None:
         chat_mode_id = db.get_current_chat_mode(chat_id)
