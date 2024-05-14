@@ -6,13 +6,12 @@ import config
 MODEL_GPT_35_TURBO = "gpt-3.5-turbo"
 MODEL_GPT_4 = "gpt-4"
 MODEL_GPT_4_TURBO = "gpt-4-turbo"
-# MODEL_GPT_4_32K = "gpt-4-32k"
+MODEL_GPT_4_OMNI = "gpt-4o"
 
 SUPPORTED_MODELS = set(
     [
         MODEL_GPT_35_TURBO,
-        MODEL_GPT_4_TURBO,
-        # MODEL_GPT_4_32K,
+        MODEL_GPT_4_OMNI,
     ]
 )
 
@@ -42,6 +41,7 @@ def max_output_tokens(model: str, num_context_tokens: int = None):
     if model in {
         MODEL_GPT_35_TURBO,
         MODEL_GPT_4_TURBO,
+        MODEL_GPT_4_OMNI,
     }:
         return min(4096, remaing)
     return remaing
@@ -55,8 +55,9 @@ def max_context_tokens(model):
     elif model == MODEL_GPT_4_TURBO:
         # The intended value is 128,000, but a limit was imposed to avoid excessive expenses.
         return 16384
-    # elif model == MODEL_GPT_4_32K:
-    #     return 32768
+    elif model == MODEL_GPT_4_OMNI:
+        # The intended value is 128,000, but a limit was imposed to avoid excessive expenses.
+        return 32768
     else:
         raise NotImplementedError(
             f"""max_context_tokens() is not implemented for model {model}."""

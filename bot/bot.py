@@ -516,7 +516,7 @@ async def message_handle(
     # load model
     model_id = db.get_current_model(chat_id)
     if model_id == "gpt4":
-        model = openai_utils.MODEL_GPT_4_TURBO
+        model = openai_utils.MODEL_GPT_4_OMNI
     elif model_id == "gemini":
         model = gemini_utils.MODEL_GEMINI_VISION
     else:

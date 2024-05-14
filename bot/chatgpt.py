@@ -61,10 +61,10 @@ def build_prompt(
                 system_prompt,
                 dialog_messages,
                 new_message,
-                openai_utils.MODEL_GPT_4_TURBO,
+                openai_utils.MODEL_GPT_4_OMNI,
             )
             num_prompt_tokens = openai_utils.num_tokens_from_messages(
-                prompt, openai_utils.MODEL_GPT_4_TURBO
+                prompt, openai_utils.MODEL_GPT_4_OMNI
             )
         else:
             prompt = openai_utils.prompt_from_chat_messages(
@@ -88,13 +88,13 @@ def build_prompt(
 def cost_factors(model):
     if model == gemini_utils.MODEL_GEMINI_VISION:
         return 3, 3
-    if model == openai_utils.MODEL_GPT_4:
+    elif model == openai_utils.MODEL_GPT_4:
         return 15, 20
-    if model == openai_utils.MODEL_GPT_4_TURBO:
-        return 10, 15
-    # elif model == openai_utils.MODEL_GPT_4_32K:
-    #     return 20, 20
-    return 0.5, 1
+    elif model == openai_utils.MODEL_GPT_4_TURBO:
+        return 10, 20
+    elif model == openai_utils.MODEL_GPT_4_OMNI:
+        return 5, 15
+    return 0.5, 1.5
 
 
 async def send_message(
@@ -109,7 +109,7 @@ async def send_message(
     if model == gemini_utils.MODEL_GEMINI_VISION:
         answer = gemini_utils.send_message(model, prompt, history, image=image)
         num_completion_tokens = openai_utils.num_tokens_from_string(
-            answer, model=openai_utils.MODEL_GPT_4_TURBO
+            answer, model=openai_utils.MODEL_GPT_4_OMNI
         )
         yield True, answer, num_completion_tokens
         return
