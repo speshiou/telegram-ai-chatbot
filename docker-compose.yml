@@ -3,8 +3,7 @@ version: "3"
 services:
   telegram_ai_chatbot:
     environment:
-      - MONGODB_HOST=${MONGODB_HOST:-mongo}
-      - MONGODB_PORT=${MONGODB_PORT:-27017}
+      - MONGODB_URI=${MONGODB_URI:?error}
       - MONGODB_DATABASE=${MONGODB_DATABASE:-telegram-ai-chatbot}
       - TELEGRAM_BOT_NAME=${TELEGRAM_BOT_NAME}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:?error}
@@ -35,5 +34,5 @@ services:
     restart: always
     build:
       context: "."
-    volumes: 
+    volumes:
       - ${GCP_KEY:-.gcp_key.json}:/.gcp_key.json
