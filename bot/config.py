@@ -204,5 +204,8 @@ ENABLE_CUSTOM_ROLE = (
 DEFAULT_CHAT_TIMEOUT = _env_parse_int("DEFAULT_CHAT_TIMEOUT", 60 * 60 * 1)
 API_ENDPOINT = os.getenv("API_ENDPOINT")
 WEB_APP_URL = os.getenv("WEB_APP_URL")
+PURCHASE_URL = (
+    os.path.join(WEB_APP_URL, "purchase?start_for_result=1") if WEB_APP_URL else None
+)
 BUGREPORT_BOT_TOKEN = os.getenv("BUGREPORT_BOT_TOKEN")
 BUGREPORT_CHAT_ID = os.getenv("BUGREPORT_CHAT_ID")

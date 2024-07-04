@@ -1413,43 +1413,18 @@ async def show_balance_handle(update: Update, context: CallbackContext):
     # text += f"You spent <b>{n_spent_dollars:.03f}$</b>\n"
     # text += f"You used <b>{used_tokens}</b> tokens <i>(price: ${config.TOKEN_PRICE} per 1000 tokens)</i>\n"
 
-    tokens_packs = [
-        {
-            "payment_amount": 1.99,
-            "tokens_amount": price_to_tokens(2),
-        },
-        {
-            "payment_amount": 7.99,
-            "tokens_amount": price_to_tokens(10),
-            "caption": "-20%",
-        },
-        {
-            "payment_amount": 13.99,
-            "tokens_amount": price_to_tokens(20),
-            "caption": "-30%",
-        },
-        {
-            "payment_amount": 24.99,
-            "tokens_amount": price_to_tokens(50),
-            "caption": "-50%",
-        },
-    ]
-
-    buttons = map(
-        lambda pack: InlineKeyboardButton(
-            "+{:,} tokens - ${:,.2f}{}".format(
-                pack["tokens_amount"],
-                pack["payment_amount"],
-                " ({})".format(pack["caption"]) if "caption" in pack else "",
-            ),
-            callback_data="top_up|{}|{}".format(
-                pack["payment_amount"], pack["tokens_amount"]
-            ),
-        ),
-        tokens_packs,
+    reply_markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "💎 " + _("Get more tokens"),
+                    web_app=WebAppInfo(
+                        os.path.join(config.PURCHASE_URL)
+                    ),
+                )
+            ]
+        ]
     )
-    rows = map(lambda button: [button], buttons)
-    reply_markup = InlineKeyboardMarkup(list(rows))
 
     await reply_or_edit_text(
         update,
@@ -1457,118 +1432,6 @@ async def show_balance_handle(update: Update, context: CallbackContext):
         parse_mode=ParseMode.HTML,
         reply_markup=reply_markup,
         disable_web_page_preview=True,
-    )
-
-
-def price_to_tokens(price: float):
-    return int(price / config.TOKEN_PRICE * 1000)
-
-
-async def show_payment_methods(update: Update, context: CallbackContext):
-    user = await register_user_if_not_exists(update, context)
-    chat_id = update.effective_chat.id
-    _ = get_text_func(user, chat_id)
-
-    query = update.callback_query
-    await query.answer()
-    c, amount, tokens_amount = query.data.split("|")
-
-    amount = float(amount)
-
-    if amount > 100 or amount < 0.1:
-        text_not_in_range = _("💡 Only accept number between 0.1 to 100")
-        await reply_or_edit_text(update, text_not_in_range)
-
-    text = _("🛒 Choose the payment method\n\n")
-    text += _("💳 Debit or Credit Card - support 200+ countries/regions\n")
-    text += "\n"
-    text += _("💎 Crypto - BTC, USDT, USDC, TON, BNB\n")
-    reply_markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(
-                    _("💳 Debit or Credit Card"),
-                    callback_data=f"payment|paypal|{amount}|{tokens_amount}",
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    _("💎 Crypto"),
-                    callback_data=f"payment|crypto|{amount}|{tokens_amount}",
-                )
-            ],
-        ]
-    )
-
-    await query.edit_message_text(
-        text, parse_mode=ParseMode.HTML, reply_markup=reply_markup
-    )
-
-
-async def show_invoice(update: Update, context: CallbackContext):
-    user = await register_user_if_not_exists(update, context)
-    chat_id = update.effective_chat.id
-    _ = get_text_func(user, chat_id)
-
-    query = update.callback_query
-    await query.answer()
-    user_id = query.from_user.id
-    c, method, amount, token_amount = query.data.split("|")
-
-    amount = float(amount)
-    token_amount = int(float(token_amount))
-
-    await query.edit_message_text(
-        _("📋 Creating an invoice ..."),
-        parse_mode=ParseMode.HTML,
-    )
-
-    result = await api.create_order(user_id, method, amount, token_amount)
-
-    if result and result["status"] == "OK":
-        text = _("📋 <b>Your invoice</b>:\n\n")
-        text += "{:,} tokens\n".format(token_amount)
-        text += "------------------\n"
-        text += f"${amount}\n\n\n"
-
-        text += _("💡 <b>Tips</b>:\n")
-
-        tips = []
-
-        button_text = ""
-        if method == "paypal":
-            tips.append(
-                _(
-                    "If you do not have a PayPal account, click on the button located below the login button to pay with cards directly."
-                )
-            )
-            button_text = _("💳 Pay with Debit or Credit Card")
-        elif method == "crypto":
-            tips.append(
-                _(
-                    "If you have any issues related to crypto payment, please contact the customer service in the payment page, or send messages to {} directly for assistance."
-                ).format("@cryptomus_support")
-            )
-            button_text = _("💎 Pay with Crypto")
-
-        tips.append(_("Tokens will be credited within 10 minutes of payment."))
-        tips.append(
-            _(
-                "Please contact @{} if tokens are not received after 1 hour of payment."
-            ).format(config.SUPPORT_USER_NAME)
-        )
-
-        text += "\n\n".join(map(lambda s: "• " + s, tips))
-
-        reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(button_text, url=result["url"])]]
-        )
-    else:
-        text = _("⚠️ Failed to create an invoice, please try again later.")
-        reply_markup = None
-
-    await query.edit_message_text(
-        text, parse_mode=ParseMode.HTML, reply_markup=reply_markup
     )
 
 
@@ -1710,10 +1573,6 @@ def run_bot() -> None:
     application.add_handler(
         CallbackQueryHandler(show_balance_handle, pattern="^balance")
     )
-    application.add_handler(
-        CallbackQueryHandler(show_payment_methods, pattern="^top_up\|(\d)+")
-    )
-    application.add_handler(CallbackQueryHandler(show_invoice, pattern="^payment\|"))
     application.add_handler(
         CommandHandler("earn", show_earn_handle, filters=user_filter)
     )
