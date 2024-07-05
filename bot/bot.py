@@ -18,6 +18,7 @@ from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     WebAppInfo,
+    MenuButtonWebApp,
 )
 from telegram.ext import (
     Application,
@@ -1265,6 +1266,18 @@ async def set_chat_model(update: Update, context: CallbackContext, model=None):
     )
 
 
+async def reset_chat_menu_button(update: Update, context: CallbackContext):
+    chat = update.effective_chat
+    if chat.type != Chat.PRIVATE:
+        return
+
+    if config.WEB_APP_URL:
+        await context.bot.set_chat_menu_button(
+            chat.id,
+            MenuButtonWebApp("Settings", WebAppInfo(config.WEB_APP_URL)),
+        )
+
+
 async def set_chat_mode(
     update: Update, context: CallbackContext, chat_mode_id=None, reason: str = None
 ):
@@ -1331,6 +1344,8 @@ async def set_chat_mode(
         text = icon_prefix + _("You're now chatting with {} ({}) ...").format(
             chat_mode["name"], model["name"]
         )
+
+        await reset_chat_menu_button(update, context)
 
     if show_tips:
         tips = ui.chat_mode_tips(chat_mode_id, _)
@@ -1418,9 +1433,7 @@ async def show_balance_handle(update: Update, context: CallbackContext):
             [
                 InlineKeyboardButton(
                     "💎 " + _("Get more tokens"),
-                    web_app=WebAppInfo(
-                        os.path.join(config.PURCHASE_URL)
-                    ),
+                    web_app=WebAppInfo(config.PURCHASE_URL),
                 )
             ]
         ]
