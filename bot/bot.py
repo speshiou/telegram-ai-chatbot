@@ -44,7 +44,6 @@ import gemini_utils
 import chatgpt
 import tts_helper
 import gen_image_utils
-import api
 import ui
 import helper
 import i18n
@@ -62,7 +61,6 @@ def get_commands(lang=i18n.DEFAULT_LOCALE):
         BotCommand("image", _("generate images")),
         BotCommand("reset", _("start a new conversation")),
         BotCommand("balance", _("check balance")),
-        # BotCommand("earn", _("earn rewards by referral")),
     ]
 
     if not config.ENABLE_SELECT_MODEL:
@@ -1476,37 +1474,6 @@ async def close_handle(update: Update, context: CallbackContext):
     await update.effective_message.delete()
 
 
-async def show_earn_handle(update: Update, context: CallbackContext):
-    user = await register_user_if_not_exists(update, context)
-    chat_id = update.effective_chat.id
-    _ = get_text_func(user, chat_id)
-
-    result = await api.earn(user.id)
-
-    if result and result["status"] == "OK":
-        referral_url = result["referral_url"]
-
-        text = _("<b>💰 Earn</b>\n\n")
-        # text += "\n\n"
-        text += _("Get %s%% rewards from the referred payments\n\n") % (
-            result["commission_rate"] * 100
-        )
-        text += _("Unused rewards: ${:,.2f}\n").format(result["unused_rewards"])
-        text += _("Total earned: ${:,.2f}\n\n").format(result["total_earned"])
-        text += _("Referral link:\n")
-        text += f'<a href="{referral_url}">{referral_url}</a>\n'
-        text += _("<i>You have referred {:,} new users</i>\n\n").format(
-            result["referred_count"]
-        )
-        text += _(
-            "<i>💡 Refer the new users via your referral link, and you'll get a reward when they make a payment.</i>"
-        )
-    else:
-        text = _("⚠️ Server error, please try again later.")
-
-    await reply_or_edit_text(update, text)
-
-
 async def edited_message_handle(update: Update, context: CallbackContext):
     user = await register_user_if_not_exists(update, context)
     chat_id = update.effective_chat.id
@@ -1585,9 +1552,6 @@ def run_bot() -> None:
     )
     application.add_handler(
         CallbackQueryHandler(show_balance_handle, pattern="^balance")
-    )
-    application.add_handler(
-        CommandHandler("earn", show_earn_handle, filters=user_filter)
     )
     application.add_handler(
         CommandHandler("gpt", common_command_handle, filters=user_filter)
